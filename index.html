@@ -632,11 +632,11 @@ async function loadData(version, lang) {
 }
 
 /* ---------- roll ---------- */
-function rollPlayer(d, lane, used) {
+function rollPlayer(d, lane, used, champ) {
   const free = d.champList.filter(c => !used.has(c.id));
   // 'any' draws from the whole roster; the lane shown is then one the champion actually plays.
   const fit = lane === 'any' ? free : free.filter(c => c.lanes.includes(lane));
-  const champ = pick(fit.length ? fit : free);
+  champ = champ || pick(fit.length ? fit : free);
   used.add(champ.id);
   if (lane === 'any') lane = pick(champ.lanes.length ? champ.lanes : LANES);
 
@@ -668,12 +668,22 @@ function rollAll() {
   if (S.mode === 'solo') {
     return { v: S.version, m: 's', p: [rollPlayer(S.d, S.lane, used)] };
   }
-  // Players who picked a lane keep it; the lanes nobody picked are dealt at random to the rest.
+  // Players who picked a lane get a champion from it. Random players get any champion from the
+  // whole roster, then the lanes nobody picked are handed out, matching a champion's own lanes when possible.
+  const champs = S.teamLanes.map(l => l === 'any' ? null : rollPlayer(S.d, l, used).c);
+  S.teamLanes.forEach((l, k) => { if (l === 'any') { const c = pick(S.d.champList.filter(x => !used.has(x.id))); used.add(c.id); champs[k] = c.id; } });
   const left = shuffle(LANES.filter(l => !S.teamLanes.includes(l)));
-  const lanes = S.teamLanes.map(l => l === 'any' ? left.pop() : l);
+  const lanes = S.teamLanes.slice();
+  const open = shuffle(lanes.map((l, k) => k).filter(k => lanes[k] === 'any'))
+    .sort((a, b) => S.d.champs[champs[a]].lanes.length - S.d.champs[champs[b]].lanes.length);
+  for (const k of open) {
+    const own = left.filter(l => S.d.champs[champs[k]].lanes.includes(l));
+    const ln = own.length ? pick(own) : left[0];
+    left.splice(left.indexOf(ln), 1); lanes[k] = ln;
+  }
   return {
     v: S.version, m: 't',
-    p: lanes.map((ln, k) => Object.assign(rollPlayer(S.d, ln, used), { n: S.names[k].trim().slice(0, 24) }))
+    p: lanes.map((ln, k) => Object.assign(rollPlayer(S.d, ln, new Set(), S.d.champs[champs[k]]), { n: S.names[k].trim().slice(0, 24) }))
   };
 }
 
@@ -830,7 +840,7 @@ async function renderResult(animate) {
       const slot = el('div', 'slot');
       const head = el('div', 'shead');
       head.innerHTML = `<span class="pname">${esc(p.n || `${t('player')} ${k + 1}`)}</span>${laneChip(p.ln)}`;
-      const reel = makeReel(p.c, true, p.ln), card = teamCard(p, k);
+      const reel = makeReel(p.c, true, S.teamLanes[k] === 'any' ? 'any' : p.ln), card = teamCard(p, k);
       slot.append(head, reel); slots.append(slot); cards.append(card);
       pairs.push([reel, card]);
     });
