@@ -88,7 +88,7 @@ h1 .g{background:var(--grad); -webkit-background-clip:text; background-clip:text
 .panel{position:relative; border-radius:var(--r); padding:22px; background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.02));
   border:1px solid var(--stroke); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
   box-shadow:0 30px 80px -40px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.06)}
-.controls{display:grid; grid-template-columns:auto 1fr auto; gap:18px 28px; align-items:end}
+.controls{display:flex; flex-wrap:wrap; gap:20px 28px; align-items:flex-end}
 .field{display:flex; flex-direction:column; gap:10px; min-width:0}
 .flabel{font-size:.72rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--dim)}
 .seg{display:inline-flex; flex-wrap:wrap; gap:4px; padding:4px; border-radius:14px; background:rgba(0,0,0,.35); border:1px solid var(--stroke); width:max-content; max-width:100%}
@@ -98,21 +98,30 @@ h1 .g{background:var(--grad); -webkit-background-clip:text; background-clip:text
 .seg button:hover:not(:disabled){color:var(--text)}
 .seg button[aria-pressed="true"]{color:var(--text); background:rgba(255,255,255,.09); box-shadow:inset 0 0 0 1px var(--stroke2)}
 .seg button:disabled{cursor:not-allowed}
-.seg .sw{width:8px; height:8px; border-radius:50%; background:var(--c); opacity:.5; transition:opacity .2s, box-shadow .2s}
-.seg button[aria-pressed="true"] .sw{opacity:1; box-shadow:0 0 10px var(--c)}
-.seg button[data-v="light"]{--c:var(--light)}
-.seg button[data-v="mid"]{--c:var(--mid)}
-.seg button[data-v="chaos"]{--c:var(--chaos)}
-.seg button[data-v="mix"] .sw{background:conic-gradient(var(--light),var(--mid),var(--chaos),var(--light))}
+.seg button svg{width:17px; height:17px; flex:none; opacity:.7; transition:opacity .2s, color .2s}
+.seg button[aria-pressed="true"] svg{opacity:1; color:var(--a2)}
 
-.names{grid-column:1/-1}
+.toggles{display:flex; flex-wrap:wrap; gap:8px}
+.tog{display:inline-flex; align-items:center; gap:10px; height:48px; padding:0 14px 0 10px; border-radius:14px; cursor:pointer;
+  border:1px solid var(--stroke); background:rgba(0,0,0,.35); color:var(--muted); font-weight:600; font-size:.92rem;
+  transition:color .2s, border-color .2s, background .2s}
+.tog:hover:not(:disabled){color:var(--text)}
+.tog .knob{position:relative; width:36px; height:22px; flex:none; border-radius:999px; background:rgba(255,255,255,.12); transition:background .25s}
+.tog .knob::after{content:''; position:absolute; top:3px; left:3px; width:16px; height:16px; border-radius:50%; background:#fff;
+  box-shadow:0 1px 4px rgba(0,0,0,.4); transition:transform .25s var(--ease)}
+.tog[aria-checked="true"]{color:var(--text); border-color:rgba(139,92,246,.45); background:rgba(139,92,246,.08)}
+.tog[aria-checked="true"] .knob{background:var(--grad)}
+.tog[aria-checked="true"] .knob::after{transform:translateX(14px)}
+.tog:disabled{cursor:not-allowed; opacity:.6}
+
+.names{flex-basis:100%}
 .name-inputs{display:grid; grid-template-columns:repeat(5,1fr); gap:8px}
 .name-inputs input{width:100%; height:44px; font:500 .95rem var(--body); color:var(--text); background:rgba(0,0,0,.35);
   border:1px solid var(--stroke); border-radius:var(--r-sm); padding:0 14px; transition:border-color .2s, background .2s}
 .name-inputs input::placeholder{color:var(--dim)}
 .name-inputs input:focus{outline:none; border-color:rgba(139,92,246,.6); background:rgba(139,92,246,.06)}
 
-.actions{display:flex; gap:10px; align-items:center; justify-content:flex-end}
+.actions{display:flex; gap:10px; align-items:center; justify-content:flex-end; margin-left:auto}
 .spin{position:relative; isolation:isolate; display:inline-flex; align-items:center; justify-content:center; gap:10px;
   height:56px; padding:0 30px; border:0; border-radius:16px; cursor:pointer; color:#fff;
   font:700 .95rem var(--display); letter-spacing:.02em; white-space:nowrap;
@@ -213,9 +222,6 @@ h1 .g{background:var(--grad); -webkit-background-clip:text; background-clip:text
 .lane svg{width:16px; height:16px}
 
 /* difficulty chip */
-.lv{--c:var(--mid); display:inline-flex; align-items:center; gap:7px; font-size:.72rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--c)}
-.lv::before{content:''; width:8px; height:8px; border-radius:50%; background:var(--c); box-shadow:0 0 12px var(--c)}
-.lv-light{--c:var(--light)} .lv-mid{--c:var(--mid)} .lv-chaos{--c:var(--chaos)}
 
 /* ---------- Solo bento ---------- */
 .solo{display:grid; gap:16px}
@@ -237,16 +243,12 @@ h1 .g{background:var(--grad); -webkit-background-clip:text; background-clip:text
 .ctitle::first-letter{text-transform:uppercase}
 .who .lane{align-self:flex-start; margin-top:6px}
 
-.rule-tile{grid-column:span 7; --c:var(--mid); border-color:color-mix(in srgb,var(--c) 35%,transparent);
-  background:radial-gradient(120% 140% at 0% 0%,color-mix(in srgb,var(--c) 16%,transparent),transparent 60%),linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.015))}
-.rule-tile.lv-light{--c:var(--light)} .rule-tile.lv-chaos{--c:var(--chaos)}
-.rule-tile .lv{margin-bottom:14px}
-.rule-tile p{margin:0; font:600 clamp(1.2rem,2.6vw,1.6rem)/1.3 var(--body); letter-spacing:-.01em; text-wrap:balance}
 .spells-tile{grid-column:span 5}
+.spells-tile.full,.runes-tile.full{grid-column:1/-1}
 .spells{display:flex; flex-direction:column; gap:10px}
 .spell{display:flex; align-items:center; gap:14px; font-weight:600}
 .spell img{width:52px; height:52px; border-radius:14px; border:1px solid var(--stroke2)}
-.runes-tile{grid-column:span 5}
+.runes-tile{grid-column:span 7}
 .ks-row{display:flex; align-items:center; gap:16px}
 .ks{width:72px; height:72px; flex:none; border-radius:50%; background:radial-gradient(circle,rgba(139,92,246,.35),rgba(0,0,0,.4) 70%); padding:6px;
   box-shadow:0 0 0 1px var(--stroke2),0 0 30px rgba(139,92,246,.3)}
@@ -255,8 +257,8 @@ h1 .g{background:var(--grad); -webkit-background-clip:text; background-clip:text
 .rsmall{display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:18px}
 .rsmall img{width:36px; height:36px; border-radius:50%; background:rgba(0,0,0,.45); padding:3px; box-shadow:0 0 0 1px var(--stroke)}
 .rsmall i{width:1px; height:26px; background:var(--stroke2); margin:0 4px}
-.build-tile{grid-column:span 7}
-.items{list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px}
+.build-tile{grid-column:1/-1}
+.items{list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px}
 .items li{display:flex; align-items:center; gap:12px; padding:8px; border-radius:14px; background:rgba(0,0,0,.25); border:1px solid var(--stroke); min-width:0}
 .items .ic{position:relative; flex:none}
 .items img{width:44px; height:44px; border-radius:10px}
@@ -286,8 +288,6 @@ h1 .g{background:var(--grad); -webkit-background-clip:text; background-clip:text
 .kit .tree{width:26px; height:26px; border:0; border-radius:0; opacity:.8}
 .titems{display:grid; grid-template-columns:repeat(3,1fr); gap:6px}
 .titems img{width:100%; aspect-ratio:1; height:auto; border-radius:9px; border:1px solid var(--stroke)}
-.trule{margin-top:auto; padding-top:12px; border-top:1px solid var(--stroke)}
-.trule p{margin:6px 0 0; font-weight:600; font-size:.92rem; line-height:1.35}
 
 /* ---------- Footer & toast ---------- */
 footer{margin-top:64px; padding-top:24px; border-top:1px solid var(--stroke); color:var(--dim); font-size:.78rem; max-width:80ch}
@@ -301,17 +301,21 @@ footer p{margin:0}
 
 /* ---------- Responsive ---------- */
 @media (max-width:1020px){
-  .controls{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .actions{grid-column:1/-1; justify-content:stretch}
+  .actions{flex-basis:100%; justify-content:stretch; margin-left:0}
   .spin{flex:1}
+  .items{grid-template-columns:repeat(2,minmax(0,1fr))}
   .cards{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
 }
 @media (max-width:760px){
   .wrap{padding:18px 16px 40px}
   .hero{padding:40px 0 24px}
   .panel{padding:16px}
-  .controls{grid-template-columns:minmax(0,1fr)}
+  .controls{flex-direction:column; align-items:stretch}
   .seg{width:100%; display:grid; grid-template-columns:repeat(2,minmax(0,1fr))}
+  #lane{grid-template-columns:repeat(3,minmax(0,1fr))}
+  #lane button{padding:0 6px; font-size:.85rem; gap:6px}
+  .toggles{display:grid; grid-template-columns:repeat(2,minmax(0,1fr))}
+  .tog{font-size:.88rem}
   .seg button{justify-content:center; padding:0 10px}
   .actions{flex-direction:column-reverse; align-items:stretch}
   .actions .ghost{justify-content:center; height:48px}
@@ -330,7 +334,7 @@ footer p{margin:0}
   .bento{gap:12px}
   .hero-tile{min-height:300px}
   .hero-tile .who{padding:20px}
-  .rule-tile,.spells-tile,.runes-tile,.build-tile{grid-column:1/-1}
+  .spells-tile,.runes-tile,.build-tile{grid-column:1/-1}
   .spells{flex-direction:row; flex-wrap:wrap; gap:14px 22px}
   .items{grid-template-columns:1fr}
   .cards{grid-template-columns:1fr}
@@ -386,13 +390,15 @@ footer p{margin:0}
           <button type="button" data-v="team"><span data-t="team"></span></button>
         </div>
       </div>
+      <div class="field" id="lane-f">
+        <span class="flabel" id="lane-l" data-t="lane"></span>
+        <div class="seg" id="lane" role="group" aria-labelledby="lane-l"></div>
+      </div>
       <div class="field">
-        <span class="flabel" id="level-l" data-t="level"></span>
-        <div class="seg" id="level" role="group" aria-labelledby="level-l">
-          <button type="button" data-v="light"><i class="sw"></i><span data-t="light"></span></button>
-          <button type="button" data-v="mid"><i class="sw"></i><span data-t="mid"></span></button>
-          <button type="button" data-v="chaos"><i class="sw"></i><span data-t="chaos"></span></button>
-          <button type="button" data-v="mix"><i class="sw"></i><span data-t="mix"></span></button>
+        <span class="flabel" id="roll-l" data-t="roll"></span>
+        <div class="toggles" role="group" aria-labelledby="roll-l">
+          <button type="button" class="tog" role="switch" id="t-runes"><i class="knob"></i><span data-t="runes"></span></button>
+          <button type="button" class="tog" role="switch" id="t-spells"><i class="knob"></i><span data-t="spells"></span></button>
         </div>
       </div>
       <div class="actions">
@@ -431,77 +437,49 @@ footer p{margin:0}
 
 const DD = 'https://ddragon.leagueoflegends.com';
 const LANES = ['top', 'jungle', 'mid', 'bot', 'support'];
-const LEVELS = ['light', 'mid', 'chaos', 'mix'];
 
 const T = {
   pt: {
-    tagline: 'Sorteie campeão, rota, build, runas e uma regra absurda. Depois aguente as consequências.',
+    tagline: 'Sorteie campeão, rota, build, runas e feitiços pra sua próxima partida. Ou pro time inteiro.',
     mode: 'Modo', solo: 'Solo', team: 'Time de 5',
-    level: 'Dificuldade', light: 'Leve', mid: 'Médio', chaos: 'Caótico', mix: 'Misto',
+    lane: 'Rota', any: 'Aleatória', roll: 'Sortear também',
     names: 'Nomes dos jogadores (opcional)', player: 'Jogador',
     spin: 'Girar a roleta', again: 'Girar de novo', copy: 'Copiar link',
     copied: 'Link copiado', copyFail: 'Não deu pra copiar. Copie o endereço da barra do navegador.',
-    spells: 'Feitiços', runes: 'Runas', build: 'Build', rule: 'Regra',
+    spells: 'Feitiços', runes: 'Runas', build: 'Build',
     loading: 'Carregando dados do patch…',
     error: 'Não foi possível carregar os dados da Riot. Verifique a conexão e tente de novo.',
     retry: 'Tentar de novo',
     badLink: 'Esse link de desafio está quebrado ou é de um patch incompatível. Gire um novo.',
-    empty: 'Escolha o modo e a dificuldade, depois gire a roleta.',
-    ready: 'Pronto pra girar?', h1a: 'Gire. Aceite.', h1b: 'Sobreviva.', rolling: 'Girando…', team5: 'Seu time',
+    empty: 'Escolha o modo e a rota, depois gire a roleta.',
+    ready: 'Pronto pra girar?', h1a: 'Gire. Aceite.', h1b: 'Jogue.', rolling: 'Girando…', team5: 'Seu time',
     patch: 'Patch',
     lanes: { top: 'Topo', jungle: 'Selva', mid: 'Meio', bot: 'Atirador', support: 'Suporte' },
     legal: 'Rift Roulette não é endossado pela Riot Games e não reflete as opiniões da Riot Games nem de ninguém oficialmente envolvido na produção ou gestão de League of Legends. League of Legends e Riot Games são marcas registradas da Riot Games, Inc.'
   },
   en: {
-    tagline: 'Roll a champion, lane, build, runes and one absurd rule. Then live with it.',
+    tagline: 'Roll a champion, lane, build, runes and spells for your next game. Or for the whole team.',
     mode: 'Mode', solo: 'Solo', team: 'Team of 5',
-    level: 'Difficulty', light: 'Mild', mid: 'Medium', chaos: 'Chaotic', mix: 'Mixed',
+    lane: 'Lane', any: 'Random', roll: 'Also roll',
     names: 'Player names (optional)', player: 'Player',
     spin: 'Spin the roulette', again: 'Spin again', copy: 'Copy link',
     copied: 'Link copied', copyFail: "Couldn't copy. Copy the address from your browser bar.",
-    spells: 'Spells', runes: 'Runes', build: 'Build', rule: 'Rule',
+    spells: 'Spells', runes: 'Runes', build: 'Build',
     loading: 'Loading patch data…',
     error: "Couldn't load Riot data. Check your connection and try again.",
     retry: 'Try again',
     badLink: 'This challenge link is broken or from an incompatible patch. Spin a new one.',
-    empty: 'Pick a mode and difficulty, then spin the roulette.',
-    ready: 'Ready to spin?', h1a: 'Spin. Accept.', h1b: 'Survive.', rolling: 'Spinning…', team5: 'Your team',
+    empty: 'Pick a mode and lane, then spin the roulette.',
+    ready: 'Ready to spin?', h1a: 'Spin. Accept.', h1b: 'Play.', rolling: 'Spinning…', team5: 'Your team',
     patch: 'Patch',
     lanes: { top: 'Top', jungle: 'Jungle', mid: 'Mid', bot: 'Bot', support: 'Support' },
     legal: "Rift Roulette isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing League of Legends. League of Legends and Riot Games are trademarks or registered trademarks of Riot Games, Inc."
   }
 };
 
-const RULES = {
-  l1: { lv: 'light', pt: 'Toda vez que morrer, mande um elogio sincero pra quem te matou no chat.', en: 'Every time you die, send a sincere compliment to your killer in chat.' },
-  l2: { lv: 'light', pt: 'Proibido usar o trinket de sentinela a partida inteira.', en: 'No trinket wards for the entire game.' },
-  l3: { lv: 'light', pt: 'Compre os itens exatamente na ordem sorteada.', en: 'Buy your items in the exact order rolled.' },
-  l4: { lv: 'light', pt: 'Dê /dance depois de cada abate.', en: 'Type /dance after every kill.' },
-  l5: { lv: 'light', needFlash: true, pt: 'Flash só pra entrar em luta. Nunca pra fugir.', en: 'Flash only to engage. Never to escape.' },
-  l6: { lv: 'light', pt: 'Item inicial: só poções.', en: 'Starting items: potions only.' },
-  l7: { lv: 'light', pt: 'Compre pelo menos 5 sentinelas de controle até o fim da partida.', en: 'Buy at least 5 Control Wards before the game ends.' },
-  l8: { lv: 'light', pt: 'Nada de recall antes dos 6 minutos.', en: 'No recall before 6:00.' },
-  m1: { lv: 'mid', noBoots: true, pt: 'Sem botas. A build sorteada já vem com 6 itens.', en: 'No boots. Your rolled build has 6 items instead.' },
-  m2: { lv: 'mid', pt: 'Proibido usar a ultimate antes dos 15 minutos.', en: 'No ultimate before 15:00.' },
-  m3: { lv: 'mid', pt: 'Toda vez que um aliado morrer, você dá recall.', en: 'Every time an ally dies, you recall.' },
-  m4: { lv: 'mid', pt: 'Farm só com ataque básico. Habilidades não podem matar minions.', en: "Farm with basic attacks only. Abilities can't kill minions." },
-  m5: { lv: 'mid', pt: 'Proibido comprar poções e elixires.', en: 'No potions or elixirs.' },
-  m6: { lv: 'mid', noFlash: true, pt: 'Sem Flash. Seus feitiços já foram sorteados sem ele.', en: 'No Flash. Your spells were rolled without it.' },
-  m7: { lv: 'mid', pt: 'Você tem que ser o primeiro a entrar em toda luta de time.', en: 'You must be first in every teamfight.' },
-  m8: { lv: 'mid', pt: 'Proibido usar pings.', en: 'No pings allowed.' },
-  c1: { lv: 'chaos', pt: 'Venda as botas assim que completar o terceiro item.', en: 'Sell your boots the moment you finish your third item.' },
-  c2: { lv: 'chaos', pt: 'Câmera travada a partida inteira.', en: 'Locked camera for the entire game.' },
-  c3: { lv: 'chaos', pt: 'Depois de cada abate, volte pra base andando. Recall proibido.', en: 'After every kill, walk back to base. No recall.' },
-  c4: { lv: 'chaos', pt: 'Compre a build de trás pra frente, começando pelo último item.', en: 'Buy the build backwards, starting with the last item.' },
-  c5: { lv: 'chaos', pt: 'Ultimate proibida. A partida inteira.', en: 'No ultimate. The whole game.' },
-  c6: { lv: 'chaos', pt: 'Habilidades só em minions e monstros. Em campeões, só ataque básico.', en: 'Abilities only on minions and monsters. Champions only get basic attacks.' },
-  c7: { lv: 'chaos', pt: 'Termine a partida sem ter colocado nenhuma sentinela.', en: 'Finish the game without placing a single ward.' },
-  c8: { lv: 'chaos', noBoots: true, noFlash: true, pt: 'Sem botas e sem Flash. A build e os feitiços já vieram assim.', en: 'No boots and no Flash. Your build and spells were rolled that way.' }
-};
-
 const S = {
   lang: initialLang(), version: null, latest: null, d: null,
-  mode: 'solo', level: 'mid', names: ['', '', '', '', ''],
+  mode: 'solo', lane: 'any', runes: true, spells: true, names: ['', '', '', '', ''],
   result: null, spinning: false, loading: false, cache: {}
 };
 
@@ -514,6 +492,18 @@ const pick = a => a[rnd(a.length)];
 function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = rnd(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 function el(tag, cls) { const e = document.createElement(tag); if (cls) e.className = cls; return e; }
+
+function loadPrefs() {
+  try {
+    const o = JSON.parse(localStorage.getItem('rr-prefs') || '{}');
+    if (o.lane === 'any' || LANES.includes(o.lane)) S.lane = o.lane;
+    if (typeof o.runes === 'boolean') S.runes = o.runes;
+    if (typeof o.spells === 'boolean') S.spells = o.spells;
+  } catch (e) {}
+}
+function savePrefs() {
+  try { localStorage.setItem('rr-prefs', JSON.stringify({ lane: S.lane, runes: S.runes, spells: S.spells })); } catch (e) {}
+}
 
 function initialLang() {
   try { const s = localStorage.getItem('rr-lang'); if (s === 'pt' || s === 'en') return s; } catch (e) {}
@@ -541,18 +531,18 @@ function dec(str) {
 }
 function validShape(o) {
   return o && typeof o.v === 'string' && /^\d+\.\d+\.\d+$/.test(o.v)
-    && (o.m === 's' || o.m === 't') && LEVELS.includes(o.l)
+    && (o.m === 's' || o.m === 't')
     && Array.isArray(o.p) && o.p.length === (o.m === 's' ? 1 : 5)
-    && o.p.every(p => p && typeof p.c === 'string' && LANES.includes(p.ln) && RULES[p.r]
+    && o.p.every(p => p && typeof p.c === 'string' && LANES.includes(p.ln)
       && typeof p.n === 'string' && typeof p.b === 'string'
-      && Array.isArray(p.i) && Array.isArray(p.ru) && p.ru.length === 8
-      && Array.isArray(p.sp) && p.sp.length === 2);
+      && Array.isArray(p.i) && Array.isArray(p.ru) && (p.ru.length === 8 || p.ru.length === 0)
+      && Array.isArray(p.sp) && (p.sp.length === 2 || p.sp.length === 0));
 }
 function matchesData(o, d) {
   return o.p.every(p => d.champs[p.c]
     && p.i.every(id => d.items[id]) && (!p.b || d.items[p.b])
-    && d.treeMap[p.ru[0]] && d.treeMap[p.ru[5]]
-    && [1, 2, 3, 4, 6, 7].every(k => d.runeMap[p.ru[k]])
+    && (!p.ru.length || (d.treeMap[p.ru[0]] && d.treeMap[p.ru[5]]
+      && [1, 2, 3, 4, 6, 7].every(k => d.runeMap[p.ru[k]])))
     && p.sp.every(s => d.spells[s]));
 }
 
@@ -618,46 +608,49 @@ async function loadData(version, lang) {
 }
 
 /* ---------- roll ---------- */
-function rollPlayer(d, lane, used, level) {
+function rollPlayer(d, lane, used) {
   const champ = pick(d.champList.filter(c => !used.has(c.id)));
   used.add(champ.id);
 
-  const lv = level === 'mix' ? pick(['light', 'mid', 'chaos']) : level;
-  const ruleId = pick(Object.keys(RULES).filter(k => RULES[k].lv === lv));
-  const R = RULES[ruleId];
+  const items = shuffle(d.legend).slice(0, 5);
+  const boots = pick(d.boots);
 
-  const items = shuffle(d.legend).slice(0, R.noBoots ? 6 : 5);
-  const boots = R.noBoots ? '' : pick(d.boots);
+  let ru = [];
+  if (S.runes) {
+    const p = pick(d.trees);
+    const s = pick(d.trees.filter(x => x.id !== p.id));
+    const ks = pick(p.slots[0].runes).id;
+    const pr = [1, 2, 3].map(k => pick(p.slots[k].runes).id);
+    const sr = shuffle([1, 2, 3]).slice(0, 2).sort().map(k => pick(s.slots[k].runes).id);
+    ru = [p.id, ks, ...pr, s.id, ...sr];
+  }
 
-  const p = pick(d.trees);
-  const s = pick(d.trees.filter(x => x.id !== p.id));
-  const ks = pick(p.slots[0].runes).id;
-  const pr = [1, 2, 3].map(k => pick(p.slots[k].runes).id);
-  const sr = shuffle([1, 2, 3]).slice(0, 2).sort().map(k => pick(s.slots[k].runes).id);
+  let sp = [];
+  if (S.spells) {
+    const pool = d.spellList.filter(x => x.id !== 'SummonerSmite');
+    sp = (lane === 'jungle' && d.spells.SummonerSmite)
+      ? ['SummonerSmite', pick(pool).id]
+      : shuffle(pool).slice(0, 2).map(x => x.id);
+  }
 
-  const pool = d.spellList.filter(x => x.id !== 'SummonerSmite' && !(R.noFlash && x.id === 'SummonerFlash'));
-  let sp = (lane === 'jungle' && d.spells.SummonerSmite)
-    ? ['SummonerSmite', pick(pool).id]
-    : shuffle(pool).slice(0, 2).map(x => x.id);
-  if (R.needFlash && d.spells.SummonerFlash && !sp.includes('SummonerFlash')) sp[1] = 'SummonerFlash';
-
-  return { n: '', c: champ.id, ln: lane, r: ruleId, b: boots, i: items, ru: [p.id, ks, ...pr, s.id, ...sr], sp };
+  return { n: '', c: champ.id, ln: lane, b: boots, i: items, ru, sp };
 }
 function rollAll() {
   const used = new Set();
   if (S.mode === 'solo') {
-    return { v: S.version, m: 's', l: S.level, p: [rollPlayer(S.d, pick(LANES), used, S.level)] };
+    return { v: S.version, m: 's', p: [rollPlayer(S.d, S.lane === 'any' ? pick(LANES) : S.lane, used)] };
   }
   const lanes = shuffle(LANES);
   return {
-    v: S.version, m: 't', l: S.level,
-    p: lanes.map((ln, k) => Object.assign(rollPlayer(S.d, ln, used, S.level), { n: S.names[k].trim().slice(0, 24) }))
+    v: S.version, m: 't',
+    p: lanes.map((ln, k) => Object.assign(rollPlayer(S.d, ln, used), { n: S.names[k].trim().slice(0, 24) }))
   };
 }
 
 
 /* ---------- render ---------- */
 const LANE_SVG = {
+  any: '<path d="M3 7h3.5c2 0 3.2 1 4.3 2.6l2.4 3.8c1.1 1.6 2.3 2.6 4.3 2.6H21M3 17h3.5c1.4 0 2.4-.5 3.3-1.4M14.2 8.4c.9-.9 1.9-1.4 3.3-1.4H21" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M18.5 4.5 21 7l-2.5 2.5M18.5 14.5 21 17l-2.5 2.5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
   top: '<path d="M4 4h13l-4 4H8v5l-4 4z" fill="currentColor"/><path d="M11 20h9V11" stroke="currentColor" stroke-width="1.6" fill="none" opacity=".45"/>',
   jungle: '<path d="M12 2.5c3.6 4.2 5.4 9 2.6 15-.9-2.6-2.6-4-4.6-5 .9 3 .1 5.6-2 8.2-2.3-6.4-.6-13 4-18.2z" fill="currentColor"/>',
   mid: '<path d="M4 16.5 16.5 4H20v3.5L7.5 20H4z" fill="currentColor"/><path d="M4 11V4h7M13 20h7v-7" stroke="currentColor" stroke-width="1.6" fill="none" opacity=".45"/>',
@@ -685,6 +678,7 @@ function makeReel(winnerId, vertical) {
 
 function runeBits(p) {
   const d = S.d;
+  if (!p.ru.length) return null;
   return {
     prim: d.treeMap[p.ru[0]], sec: d.treeMap[p.ru[5]], ks: d.runeMap[p.ru[1]],
     small: [p.ru[2], p.ru[3], p.ru[4]].map(id => d.runeMap[id]),
@@ -695,7 +689,7 @@ const buildIds = p => (p.b ? [p.b] : []).concat(p.i);
 const imgTag = (src, name, cls) => `<img${cls ? ` class="${cls}"` : ''} src="${src}" alt="${esc(name)}" title="${esc(name)}" loading="lazy">`;
 
 function soloCard(p) {
-  const d = S.d, ch = d.champs[p.c], R = RULES[p.r], rb = runeBits(p);
+  const d = S.d, ch = d.champs[p.c], rb = runeBits(p), one = !rb || !p.sp.length ? ' full' : '';
   const card = el('div', 'card bento');
   card.innerHTML = `
     <article class="tile hero-tile" style="--i:0">
@@ -707,22 +701,18 @@ function soloCard(p) {
         <p class="ctitle">${esc(ch.title)}</p>
       </div>
     </article>
-    <section class="tile rule-tile lv-${R.lv}" style="--i:1">
-      <span class="lv lv-${R.lv}">${esc(t('rule'))} · ${esc(t(R.lv))}</span>
-      <p>${esc(R[S.lang])}</p>
-    </section>
-    <section class="tile spells-tile" style="--i:2">
+    ${p.sp.length ? `<section class="tile spells-tile${one}" style="--i:1">
       <h3>${esc(t('spells'))}</h3>
       <div class="spells">${p.sp.map(id => d.spells[id]).map(sp =>
         `<div class="spell">${imgTag(spellIcon(sp), sp.name)}<span>${esc(sp.name)}</span></div>`).join('')}</div>
-    </section>
-    <section class="tile runes-tile" style="--i:3">
+    </section>` : ''}
+    ${rb ? `<section class="tile runes-tile${one}" style="--i:2">
       <h3>${esc(t('runes'))}</h3>
       <div class="ks-row">${imgTag(runeIcon(rb.ks), rb.ks.name, 'ks')}
         <div><b>${esc(rb.ks.name)}</b><span>${esc(rb.prim.name)} + ${esc(rb.sec.name)}</span></div></div>
       <div class="rsmall">${rb.small.map(r => imgTag(runeIcon(r), r.name)).join('')}<i></i>${rb.small2.map(r => imgTag(runeIcon(r), r.name)).join('')}</div>
-    </section>
-    <section class="tile build-tile" style="--i:4">
+    </section>` : ''}
+    <section class="tile build-tile" style="--i:3">
       <h3>${esc(t('build'))}</h3>
       <ol class="items">${buildIds(p).map((id, k) => `<li><span class="ic">${imgTag(itemIcon(id), d.items[id].name)}<span class="n">${k + 1}</span></span><span class="nm">${esc(d.items[id].name)}</span></li>`).join('')}</ol>
     </section>`;
@@ -730,17 +720,16 @@ function soloCard(p) {
 }
 
 function teamCard(p, k) {
-  const d = S.d, ch = d.champs[p.c], R = RULES[p.r], rb = runeBits(p);
+  const d = S.d, ch = d.champs[p.c], rb = runeBits(p);
   const card = el('div', 'card tcard');
   card.innerHTML = `
     <article class="tile" style="--i:${k}">
       <div class="tart"><img src="${loadArt(p.c)}" alt="" loading="lazy">
         <div class="tname"><b>${esc(ch.name)}</b><span>${esc(p.n || `${t('player')} ${k + 1}`)} · ${esc(t('lanes')[p.ln])}</span></div></div>
       <div class="tbody">
-        <div class="kit">${p.sp.map(id => d.spells[id]).map(sp => imgTag(spellIcon(sp), sp.name)).join('')}
-          ${imgTag(runeIcon(rb.ks), `${rb.ks.name} (${rb.prim.name} + ${rb.sec.name})`, 'ksm')}${imgTag(runeIcon(rb.sec), rb.sec.name, 'tree')}</div>
+        ${p.sp.length || rb ? `<div class="kit">${p.sp.map(id => d.spells[id]).map(sp => imgTag(spellIcon(sp), sp.name)).join('')}
+          ${rb ? imgTag(runeIcon(rb.ks), `${rb.ks.name} (${rb.prim.name} + ${rb.sec.name})`, 'ksm') + imgTag(runeIcon(rb.sec), rb.sec.name, 'tree') : ''}</div>` : ''}
         <div class="titems">${buildIds(p).map(id => imgTag(itemIcon(id), d.items[id].name)).join('')}</div>
-        <div class="trule"><span class="lv lv-${R.lv}">${esc(t(R.lv))}</span><p>${esc(R[S.lang])}</p></div>
       </div>
     </article>`;
   return card;
@@ -816,7 +805,7 @@ async function renderResult(animate) {
 function announce() {
   const d = S.d;
   $('#sr').textContent = S.result.p.map(p =>
-    `${d.champs[p.c].name}, ${t('lanes')[p.ln]}. ${t('rule')}: ${RULES[p.r][S.lang]}`).join(' ');
+    `${d.champs[p.c].name}, ${t('lanes')[p.ln]}.`).join(' ');
 }
 
 function renderEmpty() {
@@ -833,7 +822,8 @@ function renderEmpty() {
 /* ---------- UI state ---------- */
 function applyTexts() {
   document.documentElement.lang = S.lang === 'pt' ? 'pt-BR' : 'en';
-  $$('[data-t]').forEach(e => { e.textContent = t(e.dataset.t); });
+  $$('[data-t]').forEach(e => { if (e.dataset.t) e.textContent = t(e.dataset.t); });
+  $$('[data-lane]').forEach(e => { if (e.dataset.lane !== 'any') e.textContent = t('lanes')[e.dataset.lane]; });
   $$('.name-inputs input').forEach((inp, k) => {
     inp.placeholder = `${t('player')} ${k + 1}`;
     inp.setAttribute('aria-label', `${t('player')} ${k + 1}`);
@@ -847,7 +837,9 @@ function syncUI() {
   const busy = S.spinning || S.loading;
   $$('.lang button').forEach(b => { b.setAttribute('aria-pressed', b.dataset.lang === S.lang); b.disabled = busy; });
   $$('#mode button').forEach(b => { b.setAttribute('aria-pressed', b.dataset.v === S.mode); b.disabled = busy; });
-  $$('#level button').forEach(b => { b.setAttribute('aria-pressed', b.dataset.v === S.level); b.disabled = busy; });
+  $$('#lane button').forEach(b => { b.setAttribute('aria-pressed', b.dataset.v === S.lane); b.disabled = busy; });
+  $('#lane-f').hidden = S.mode !== 'solo';
+  [['#t-runes', S.runes], ['#t-spells', S.spells]].forEach(([q, on]) => { $(q).setAttribute('aria-checked', on); $(q).disabled = busy; });
   $('#names').hidden = S.mode !== 'team';
   $$('.name-inputs input').forEach((inp, k) => { if (document.activeElement !== inp) inp.value = S.names[k]; });
   const spin = $('#spin');
@@ -921,7 +913,10 @@ async function setLang(l) {
 function bindOnce() {
   $$('.lang button').forEach(b => b.addEventListener('click', () => setLang(b.dataset.lang)));
   $$('#mode button').forEach(b => b.addEventListener('click', () => { S.mode = b.dataset.v; syncUI(); }));
-  $$('#level button').forEach(b => b.addEventListener('click', () => { S.level = b.dataset.v; syncUI(); }));
+  $('#lane').innerHTML = ['any'].concat(LANES).map(ln => `<button type="button" data-v="${ln}"><svg viewBox="0 0 24 24" aria-hidden="true">${LANE_SVG[ln]}</svg><span data-t="${ln === 'any' ? 'any' : ''}" data-lane="${ln}"></span></button>`).join('');
+  $$('#lane button').forEach(b => b.addEventListener('click', () => { S.lane = b.dataset.v; savePrefs(); syncUI(); }));
+  $('#t-runes').addEventListener('click', () => { S.runes = !S.runes; savePrefs(); syncUI(); });
+  $('#t-spells').addEventListener('click', () => { S.spells = !S.spells; savePrefs(); syncUI(); });
   $$('.name-inputs input').forEach((inp, k) => inp.addEventListener('input', () => { S.names[k] = inp.value; }));
   $('#spin').addEventListener('click', onSpin);
   $('#copy').addEventListener('click', onCopy);
@@ -967,7 +962,6 @@ async function boot() {
   if (shared) {
     S.result = shared;
     S.mode = shared.m === 't' ? 'team' : 'solo';
-    S.level = shared.l;
     if (shared.m === 't') S.names = shared.p.map(p => p.n || '');
     syncUI();
     renderResult(true);
@@ -976,6 +970,7 @@ async function boot() {
   }
 }
 
+loadPrefs();
 bindOnce();
 applyTexts();
 boot();
