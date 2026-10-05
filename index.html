@@ -120,6 +120,12 @@ h1 .g{background:var(--grad); -webkit-background-clip:text; background-clip:text
   border:1px solid var(--stroke); border-radius:var(--r-sm); padding:0 14px; transition:border-color .2s, background .2s}
 .name-inputs input::placeholder{color:var(--dim)}
 .name-inputs input:focus{outline:none; border-color:rgba(139,92,246,.6); background:rgba(139,92,246,.06)}
+.pl{display:flex; flex-direction:column; gap:6px; min-width:0}
+.plane{width:100%; height:38px; font:600 .85rem var(--body); color:var(--text); background:rgba(0,0,0,.35) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23a3a3b8' stroke-width='1.6' fill='none'/%3E%3C/svg%3E") no-repeat right 12px center;
+  border:1px solid var(--stroke); border-radius:var(--r-sm); padding:0 30px 0 12px; appearance:none; -webkit-appearance:none; cursor:pointer}
+.plane:focus{outline:none; border-color:rgba(34,211,238,.6)}
+.plane option{background:#14141e; color:var(--text)}
+.plane:disabled{cursor:not-allowed; opacity:.6}
 
 .actions{display:flex; gap:10px; align-items:center; justify-content:flex-end; margin-left:auto}
 .spin{position:relative; isolation:isolate; display:inline-flex; align-items:center; justify-content:center; gap:10px;
@@ -317,11 +323,11 @@ footer p{margin:0}
   .toggles{display:grid; grid-template-columns:repeat(2,minmax(0,1fr))}
   .tog{font-size:.88rem}
   .seg button{justify-content:center; padding:0 10px}
-  .actions{flex-direction:column-reverse; align-items:stretch}
+  .actions{flex-direction:column-reverse; align-items:stretch; order:10}
   .actions .ghost{justify-content:center; height:48px}
   .spin{flex:none; width:100%}
   .name-inputs{grid-template-columns:repeat(2,1fr)}
-  .name-inputs input:last-child{grid-column:1/-1}
+  .name-inputs .pl:last-child{grid-column:1/-1}
   .reel{--cell:96px; --gap:10px; padding:14px 0}
   .reel.v{--vc:calc(100cqw - 10px); --gap:6px; border-radius:14px}
   .reel.v .frame{width:calc(var(--vc) + 6px); height:calc(var(--vc) + 6px); border-radius:12px}
@@ -414,11 +420,26 @@ footer p{margin:0}
       <div class="field names" id="names" hidden>
         <span class="flabel" data-t="names"></span>
         <div class="name-inputs">
-          <input type="text" maxlength="24" autocomplete="off">
-          <input type="text" maxlength="24" autocomplete="off">
-          <input type="text" maxlength="24" autocomplete="off">
-          <input type="text" maxlength="24" autocomplete="off">
-          <input type="text" maxlength="24" autocomplete="off">
+          <div class="pl">
+            <input type="text" maxlength="24" autocomplete="off">
+            <select class="plane" data-k="0"></select>
+          </div>
+          <div class="pl">
+            <input type="text" maxlength="24" autocomplete="off">
+            <select class="plane" data-k="1"></select>
+          </div>
+          <div class="pl">
+            <input type="text" maxlength="24" autocomplete="off">
+            <select class="plane" data-k="2"></select>
+          </div>
+          <div class="pl">
+            <input type="text" maxlength="24" autocomplete="off">
+            <select class="plane" data-k="3"></select>
+          </div>
+          <div class="pl">
+            <input type="text" maxlength="24" autocomplete="off">
+            <select class="plane" data-k="4"></select>
+          </div>
         </div>
       </div>
     </div>
@@ -462,7 +483,7 @@ const T = {
     tagline: 'Sorteie campeão, rota, build, runas e feitiços pra sua próxima partida. Ou pro time inteiro.',
     mode: 'Modo', solo: 'Solo', team: 'Time de 5',
     lane: 'Rota', any: 'Aleatória', roll: 'Sortear também',
-    names: 'Nomes dos jogadores (opcional)', player: 'Jogador',
+    names: 'Jogadores: nome (opcional) e rota', player: 'Jogador',
     spin: 'Girar a roleta', again: 'Girar de novo', copy: 'Copiar link',
     copied: 'Link copiado', copyFail: 'Não deu pra copiar. Copie o endereço da barra do navegador.',
     spells: 'Feitiços', runes: 'Runas', build: 'Build',
@@ -480,7 +501,7 @@ const T = {
     tagline: 'Roll a champion, lane, build, runes and spells for your next game. Or for the whole team.',
     mode: 'Mode', solo: 'Solo', team: 'Team of 5',
     lane: 'Lane', any: 'Random', roll: 'Also roll',
-    names: 'Player names (optional)', player: 'Player',
+    names: 'Players: name (optional) and lane', player: 'Player',
     spin: 'Spin the roulette', again: 'Spin again', copy: 'Copy link',
     copied: 'Link copied', copyFail: "Couldn't copy. Copy the address from your browser bar.",
     spells: 'Spells', runes: 'Runes', build: 'Build',
@@ -498,7 +519,7 @@ const T = {
 
 const S = {
   lang: initialLang(), version: null, latest: null, d: null,
-  mode: 'solo', lane: 'any', runes: true, spells: true, names: ['', '', '', '', ''],
+  mode: 'solo', lane: 'any', teamLanes: ['any', 'any', 'any', 'any', 'any'], runes: true, spells: true, names: ['', '', '', '', ''],
   result: null, spinning: false, loading: false, cache: {}
 };
 
@@ -518,10 +539,14 @@ function loadPrefs() {
     if (o.lane === 'any' || LANES.includes(o.lane)) S.lane = o.lane;
     if (typeof o.runes === 'boolean') S.runes = o.runes;
     if (typeof o.spells === 'boolean') S.spells = o.spells;
+    if (Array.isArray(o.teamLanes) && o.teamLanes.length === 5) {
+      const seen = new Set();
+      S.teamLanes = o.teamLanes.map(l => LANES.includes(l) && !seen.has(l) ? (seen.add(l), l) : 'any');
+    }
   } catch (e) {}
 }
 function savePrefs() {
-  try { localStorage.setItem('rr-prefs', JSON.stringify({ lane: S.lane, runes: S.runes, spells: S.spells })); } catch (e) {}
+  try { localStorage.setItem('rr-prefs', JSON.stringify({ lane: S.lane, runes: S.runes, spells: S.spells, teamLanes: S.teamLanes })); } catch (e) {}
 }
 
 function initialLang() {
@@ -662,7 +687,9 @@ function rollAll() {
   if (S.mode === 'solo') {
     return { v: S.version, m: 's', p: [rollPlayer(S.d, S.lane === 'any' ? pick(LANES) : S.lane, used)] };
   }
-  const lanes = shuffle(LANES);
+  // Players who picked a lane keep it; the lanes nobody picked are dealt at random to the rest.
+  const left = shuffle(LANES.filter(l => !S.teamLanes.includes(l)));
+  const lanes = S.teamLanes.map(l => l === 'any' ? left.pop() : l);
   return {
     v: S.version, m: 't',
     p: lanes.map((ln, k) => Object.assign(rollPlayer(S.d, ln, used), { n: S.names[k].trim().slice(0, 24) }))
@@ -848,6 +875,10 @@ function applyTexts() {
   document.documentElement.lang = S.lang === 'pt' ? 'pt-BR' : 'en';
   $$('[data-t]').forEach(e => { if (e.dataset.t) e.textContent = t(e.dataset.t); });
   $$('[data-lane]').forEach(e => { if (e.dataset.lane !== 'any') e.textContent = t('lanes')[e.dataset.lane]; });
+  $$('.plane').forEach((sel, k) => {
+    sel.innerHTML = ['any'].concat(LANES).map(l => `<option value="${l}">${esc(l === 'any' ? t('any') : t('lanes')[l])}</option>`).join('');
+    sel.setAttribute('aria-label', `${t('lane')}: ${t('player')} ${k + 1}`);
+  });
   $$('.name-inputs input').forEach((inp, k) => {
     inp.placeholder = `${t('player')} ${k + 1}`;
     inp.setAttribute('aria-label', `${t('player')} ${k + 1}`);
@@ -866,6 +897,11 @@ function syncUI() {
   [['#t-runes', S.runes], ['#t-spells', S.spells]].forEach(([q, on]) => { $(q).setAttribute('aria-checked', on); $(q).disabled = busy; });
   $('#names').hidden = S.mode !== 'team';
   $$('.name-inputs input').forEach((inp, k) => { if (document.activeElement !== inp) inp.value = S.names[k]; });
+  $$('.plane').forEach((sel, k) => {
+    sel.value = S.teamLanes[k];
+    sel.disabled = busy;
+    [...sel.options].forEach(o => { o.disabled = o.value !== 'any' && S.teamLanes.some((l, j) => j !== k && l === o.value); });
+  });
   const spin = $('#spin');
   $('#spin-l').textContent = S.spinning ? t('rolling') : S.result ? t('again') : t('spin');
   spin.classList.toggle('busy', S.spinning);
@@ -942,6 +978,7 @@ function bindOnce() {
   $('#t-runes').addEventListener('click', () => { S.runes = !S.runes; savePrefs(); syncUI(); });
   $('#t-spells').addEventListener('click', () => { S.spells = !S.spells; savePrefs(); syncUI(); });
   $$('.name-inputs input').forEach((inp, k) => inp.addEventListener('input', () => { S.names[k] = inp.value; }));
+  $$('.plane').forEach((sel, k) => sel.addEventListener('change', () => { S.teamLanes[k] = sel.value; savePrefs(); syncUI(); }));
   $('#spin').addEventListener('click', onSpin);
   $('#copy').addEventListener('click', onCopy);
   window.addEventListener('hashchange', () => location.reload());
