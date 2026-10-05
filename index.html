@@ -634,9 +634,11 @@ async function loadData(version, lang) {
 /* ---------- roll ---------- */
 function rollPlayer(d, lane, used) {
   const free = d.champList.filter(c => !used.has(c.id));
-  const fit = free.filter(c => c.lanes.includes(lane));
+  // 'any' draws from the whole roster; the lane shown is then one the champion actually plays.
+  const fit = lane === 'any' ? free : free.filter(c => c.lanes.includes(lane));
   const champ = pick(fit.length ? fit : free);
   used.add(champ.id);
+  if (lane === 'any') lane = pick(champ.lanes.length ? champ.lanes : LANES);
 
   const items = shuffle(d.legend).slice(0, 5);
   const boots = pick(d.boots);
@@ -664,7 +666,7 @@ function rollPlayer(d, lane, used) {
 function rollAll() {
   const used = new Set();
   if (S.mode === 'solo') {
-    return { v: S.version, m: 's', p: [rollPlayer(S.d, S.lane === 'any' ? pick(LANES) : S.lane, used)] };
+    return { v: S.version, m: 's', p: [rollPlayer(S.d, S.lane, used)] };
   }
   // Players who picked a lane keep it; the lanes nobody picked are dealt at random to the rest.
   const left = shuffle(LANES.filter(l => !S.teamLanes.includes(l)));
@@ -789,7 +791,7 @@ function spinReel(reel, card, ms) {
     };
     if (band) {
       band.classList.remove('locked');
-      band.innerHTML = `<span>${esc(t('rolling'))}</span><span class="o">/</span><span>${esc(t('lane'))} · ${esc(t('lanes')[reel.dataset.lane])}</span>`;
+      band.innerHTML = `<span>${esc(t('rolling'))}</span><span class="o">/</span><span>${esc(t('lane'))} · ${esc(reel.dataset.lane === 'any' ? t('any') : t('lanes')[reel.dataset.lane])}</span>`;
     }
     reel.classList.remove('landed');
     strip.style.transition = 'none';
@@ -819,7 +821,7 @@ async function renderResult(animate) {
   const pairs = [];
   if (res.m === 's') {
     const wrap = el('div', 'solo');
-    const reel = makeReel(res.p[0].c, false, res.p[0].ln), card = soloCard(res.p[0]);
+    const reel = makeReel(res.p[0].c, false, S.lane === 'any' ? 'any' : res.p[0].ln), card = soloCard(res.p[0]);
     wrap.append(reel, card); box.append(wrap);
     pairs.push([reel, card]);
   } else {
