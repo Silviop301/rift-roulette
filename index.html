@@ -438,6 +438,25 @@ footer p{margin:0}
 const DD = 'https://ddragon.leagueoflegends.com';
 const LANES = ['top', 'jungle', 'mid', 'bot', 'support'];
 
+// Champions commonly played in each lane (Data Dragon ids). A champion can sit in more than one.
+// Champions missing here (e.g. a brand-new release) are placed by their Data Dragon class tags.
+const LANE_POOL = {
+  top: 'Aatrox Akali Ambessa Aurora Camille Chogath Darius DrMundo Fiora Gangplank Garen Gnar Gragas Gwen Heimerdinger Illaoi Irelia Jax Jayce KSante Kayle Kennen Kled Malphite Maokai Mordekaiser Nasus Olaf Ornn Pantheon Poppy Quinn Renekton Riven Rumble Ryze Sett Shen Singed Sion Teemo TahmKench Trundle Tryndamere Urgot Vayne Vladimir Volibear Warwick MonkeyKing Yasuo Yone Yorick Zac Zaahen',
+  jungle: 'Amumu Belveth Brand Briar Diana Ekko Elise Evelynn Fiddlesticks Gragas Graves Gwen Hecarim Ivern JarvanIV Jax Karthus Kayn Khazix Kindred LeeSin Lillia MasterYi Nidalee Nocturne Nunu Olaf Pantheon Poppy Qiyana Rammus RekSai Rengar Sejuani Shaco Shyvana Skarner Sylas Taliyah Talon Trundle Udyr Vi Viego Volibear Warwick MonkeyKing XinZhao Zac Zed Zyra',
+  mid: 'Ahri Akali Akshan Anivia Annie AurelionSol Aurora Azir Cassiopeia Corki Diana Ekko Fizz Galio Hwei Irelia Kassadin Katarina Leblanc Lissandra Lux Malzahar Mel Naafiri Neeko Orianna Qiyana Ryze Smolder Swain Sylas Syndra Taliyah Talon Tristana TwistedFate Veigar Velkoz Vex Viktor Vladimir Xerath Yasuo Yone Zed Ziggs Zoe',
+  bot: 'Aphelios Ashe Caitlyn Draven Ezreal Jhin Jinx Kaisa Kalista KogMaw Lucian MissFortune Nilah Samira Senna Seraphine Sivir Smolder Swain Tristana Twitch Varus Vayne Xayah Yasuo Yunara Zeri Ziggs',
+  support: 'Alistar Bard Blitzcrank Brand Braum Elise Galio Hwei Janna Karma Leona Lulu Lux Maokai Mel Milio Morgana Nami Nautilus Neeko Poppy Pyke Rakan Rell Renata Senna Seraphine Sona Soraka Swain TahmKench Taric Thresh Velkoz Xerath Yuumi Zilean Zyra'
+};
+const LANE_OF = {};
+for (const [ln, list] of Object.entries(LANE_POOL)) for (const id of list.split(' ')) (LANE_OF[id] = LANE_OF[id] || []).push(ln);
+const TAG_LANES = { Marksman: ['bot'], Support: ['support'], Mage: ['mid'], Assassin: ['mid', 'jungle'], Fighter: ['top', 'jungle'], Tank: ['top', 'support'] };
+function lanesOf(ch) {
+  if (LANE_OF[ch.id]) return LANE_OF[ch.id];
+  const out = new Set();
+  (ch.tags || []).slice(0, 1).forEach(tg => (TAG_LANES[tg] || []).forEach(l => out.add(l)));
+  return out.size ? [...out] : LANES;
+}
+
 const T = {
   pt: {
     tagline: 'Sorteie campeão, rota, build, runas e feitiços pra sua próxima partida. Ou pro time inteiro.',
@@ -566,8 +585,9 @@ async function loadData(version, lang) {
   );
 
   const champs = {};
-  for (const ch of Object.values(c.data)) champs[ch.id] = { id: ch.id, name: ch.name, title: ch.title };
+  for (const ch of Object.values(c.data)) champs[ch.id] = { id: ch.id, name: ch.name, title: ch.title, tags: ch.tags || [] };
   const champList = Object.values(champs);
+  for (const ch of champList) ch.lanes = lanesOf(ch);
 
   const items = i.data, legend = [], boots = [], seen = new Set();
   for (const [id, it] of Object.entries(items)) {
@@ -609,7 +629,9 @@ async function loadData(version, lang) {
 
 /* ---------- roll ---------- */
 function rollPlayer(d, lane, used) {
-  const champ = pick(d.champList.filter(c => !used.has(c.id)));
+  const free = d.champList.filter(c => !used.has(c.id));
+  const fit = free.filter(c => c.lanes.includes(lane));
+  const champ = pick(fit.length ? fit : free);
   used.add(champ.id);
 
   const items = shuffle(d.legend).slice(0, 5);
@@ -659,13 +681,15 @@ const LANE_SVG = {
 };
 const laneChip = ln => `<span class="lane"><svg viewBox="0 0 24 24" aria-hidden="true">${LANE_SVG[ln]}</svg>${esc(t('lanes')[ln])}</span>`;
 
-function makeReel(winnerId, vertical) {
+function makeReel(winnerId, vertical, lane) {
   const N = vertical ? 30 : 36, WIN = N - 6;
   const reel = el('div', 'reel' + (vertical ? ' v' : ''));
   reel.dataset.win = WIN;
   reel.setAttribute('aria-hidden', 'true');
   const strip = el('div', 'strip');
-  const others = shuffle(S.d.champList.filter(c => c.id !== winnerId));
+  let others = S.d.champList.filter(c => c.id !== winnerId);
+  if (others.filter(c => c.lanes.includes(lane)).length >= 8) others = others.filter(c => c.lanes.includes(lane));
+  others = shuffle(others);
   for (let k = 0; k < N; k++) {
     const id = k === WIN ? winnerId : others[k % others.length].id;
     const cell = el('div', 'cell' + (k === WIN ? ' w' : ''));
@@ -776,7 +800,7 @@ async function renderResult(animate) {
   const pairs = [];
   if (res.m === 's') {
     const wrap = el('div', 'solo');
-    const reel = makeReel(res.p[0].c, false), card = soloCard(res.p[0]);
+    const reel = makeReel(res.p[0].c, false, res.p[0].ln), card = soloCard(res.p[0]);
     wrap.append(reel, card); box.append(wrap);
     pairs.push([reel, card]);
   } else {
@@ -785,7 +809,7 @@ async function renderResult(animate) {
       const slot = el('div', 'slot');
       const head = el('div', 'shead');
       head.innerHTML = `<span class="pname">${esc(p.n || `${t('player')} ${k + 1}`)}</span>${laneChip(p.ln)}`;
-      const reel = makeReel(p.c, true), card = teamCard(p, k);
+      const reel = makeReel(p.c, true, p.ln), card = teamCard(p, k);
       slot.append(head, reel); slots.append(slot); cards.append(card);
       pairs.push([reel, card]);
     });
