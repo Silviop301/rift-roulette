@@ -5,208 +5,365 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Rift Roulette</title>
 <meta name="description" content="Sorteie campeão, rota, build, runas e uma regra absurda pra sua próxima partida de League of Legends.">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎲</text></svg>">
+<meta name="theme-color" content="#06060b">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%238b5cf6'/><stop offset='1' stop-color='%2322d3ee'/></linearGradient></defs><rect x='4' y='4' width='24' height='24' rx='7' fill='url(%23g)' transform='rotate(45 16 16)'/><circle cx='16' cy='16' r='4' fill='%2306060b'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --abyss:#010A13; --navy:#091428; --panel:#0B1A2C; --line:#1E2D3D;
-  --gold:#C8AA6E; --gold-hi:#F0E6D2; --gold-dk:#785A28;
-  --hex:#0AC8B9; --text:#CDBE91; --muted:#A09B8C; --red:#E84057;
-  --display:'Cinzel','Times New Roman',serif;
-  --body:'Barlow','Segoe UI',system-ui,sans-serif;
+  --bg:#06060b; --bg2:#0c0c14;
+  --glass:rgba(255,255,255,.035); --glass2:rgba(255,255,255,.06);
+  --stroke:rgba(255,255,255,.08); --stroke2:rgba(255,255,255,.14);
+  --text:#f5f5fa; --muted:#a3a3b8; --dim:#6c6c82;
+  --a1:#8b5cf6; --a2:#22d3ee; --a3:#f472b6;
+  --grad:linear-gradient(115deg,var(--a1) 0%,#6366f1 40%,var(--a2) 100%);
+  --light:#34d399; --mid:#fbbf24; --chaos:#ff3b6b;
+  --display:'Unbounded','Arial Black',system-ui,sans-serif;
+  --body:'Inter Tight','Inter','Segoe UI',system-ui,sans-serif;
+  --r:20px; --r-sm:12px;
+  --ease:cubic-bezier(.2,.8,.2,1);
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{margin:0}
-body{
-  min-height:100vh; color:var(--gold-hi); font-family:var(--body); font-size:16px; line-height:1.5;
-  background:
-    radial-gradient(1100px 520px at 50% -12%, #0e2a47 0%, transparent 62%),
-    radial-gradient(900px 420px at 50% 112%, #0a2236 0%, transparent 60%),
-    var(--abyss);
-}
-:focus-visible{outline:2px solid var(--hex); outline-offset:2px}
-.wrap{max-width:980px; margin:0 auto; padding:28px 20px 48px}
+html{background:var(--bg)}
+body{min-height:100vh; color:var(--text); font-family:var(--body); font-size:16px; line-height:1.5;
+  background:var(--bg); overflow-x:hidden; -webkit-font-smoothing:antialiased}
+img{display:block}
+button{font:inherit; color:inherit}
+:focus-visible{outline:2px solid var(--a2); outline-offset:3px}
 
-/* Header */
-header{display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap}
-.brand h1{
-  margin:0; line-height:1; font-family:var(--display); font-weight:800; letter-spacing:.04em;
-  font-size:clamp(2.2rem,7vw,3.6rem);
-  background:linear-gradient(180deg,#F0E6D2 0%,#C8AA6E 55%,#785A28 100%);
-  -webkit-background-clip:text; background-clip:text; color:transparent;
-}
-.brand p{margin:.6rem 0 0; color:var(--muted); max-width:48ch}
-.meta{display:flex; align-items:center; gap:14px}
-.patch{color:var(--muted); font-size:.85rem}
-.lang{display:inline-flex; border:1px solid var(--gold-dk)}
-.lang button{font:600 .85rem var(--body); color:var(--muted); background:transparent; border:0; padding:6px 12px; cursor:pointer}
-.lang button[aria-pressed="true"]{color:var(--abyss); background:var(--gold)}
-.lang button:disabled{cursor:not-allowed; opacity:.6}
+/* ---------- Backdrop ---------- */
+.backdrop{position:fixed; inset:0; z-index:-1; overflow:hidden; pointer-events:none}
+.backdrop .glow{position:absolute; border-radius:50%; filter:blur(90px); opacity:.55; will-change:transform}
+.backdrop .g1{width:46vw; height:46vw; left:-12vw; top:-18vw; background:#4c1d95; animation:drift1 22s ease-in-out infinite alternate}
+.backdrop .g2{width:40vw; height:40vw; right:-14vw; top:8vh; background:#0e7490; opacity:.4; animation:drift2 26s ease-in-out infinite alternate}
+.backdrop .g3{width:34vw; height:34vw; left:30vw; bottom:-22vw; background:#831843; opacity:.3; animation:drift1 30s ease-in-out infinite alternate-reverse}
+.backdrop .splash{position:absolute; inset:-60px; background-size:cover; background-position:center 20%;
+  filter:blur(48px) saturate(1.3); opacity:0; transform:scale(1.08); transition:opacity 1.2s var(--ease)}
+.backdrop .splash.on{opacity:.28}
+.backdrop .grid{position:absolute; inset:0; opacity:.5;
+  background-image:linear-gradient(var(--stroke) 1px,transparent 1px),linear-gradient(90deg,var(--stroke) 1px,transparent 1px);
+  background-size:64px 64px; mask-image:radial-gradient(ellipse 80% 60% at 50% 0%,#000 0%,transparent 75%);
+  -webkit-mask-image:radial-gradient(ellipse 80% 60% at 50% 0%,#000 0%,transparent 75%)}
+.backdrop .noise{position:absolute; inset:0; opacity:.06; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+@keyframes drift1{to{transform:translate(8vw,6vh) scale(1.1)}}
+@keyframes drift2{to{transform:translate(-10vw,10vh) scale(.92)}}
 
-hr.hex{border:0; height:1px; margin:22px 0; position:relative; overflow:visible;
-  background:linear-gradient(90deg,transparent,var(--gold-dk) 15%,var(--gold) 50%,var(--gold-dk) 85%,transparent)}
-hr.hex::after{content:''; position:absolute; left:50%; top:50%; width:9px; height:9px;
-  transform:translate(-50%,-50%) rotate(45deg); background:var(--abyss); border:1px solid var(--gold)}
+.wrap{max-width:1200px; margin:0 auto; padding:28px 24px 56px}
 
-/* Controls */
-.controls{display:flex; flex-wrap:wrap; align-items:flex-end; gap:18px 28px}
-.field{display:flex; flex-direction:column; gap:8px}
-.flabel{font:600 .95rem var(--display); color:var(--gold); letter-spacing:.03em}
-.seg{display:inline-flex; flex-wrap:wrap; border:1px solid var(--gold-dk); background:rgba(1,10,19,.6)}
-.seg button{font:600 .95rem var(--body); color:var(--muted); background:transparent; border:0;
-  border-right:1px solid var(--line); padding:9px 16px; cursor:pointer; --c:var(--gold)}
-.seg button:last-child{border-right:0}
-.seg button:hover{color:var(--gold-hi)}
-.seg button[aria-pressed="true"]{color:var(--gold-hi); background:linear-gradient(180deg,rgba(200,170,110,.16),rgba(200,170,110,.04)); box-shadow:inset 0 -2px 0 var(--c)}
-.seg button[data-v="light"]{--c:var(--hex)}
-.seg button[data-v="chaos"]{--c:var(--red)}
-.seg button[data-v="mix"]{--c:var(--gold-hi)}
+/* ---------- Header ---------- */
+header{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap}
+.logo{display:flex; align-items:center; gap:12px; text-decoration:none; color:inherit}
+.mark{width:38px; height:38px; flex:none; position:relative}
+.mark::before{content:''; position:absolute; inset:5px; border-radius:9px; background:var(--grad); transform:rotate(45deg);
+  box-shadow:0 0 24px rgba(139,92,246,.55)}
+.mark::after{content:''; position:absolute; left:50%; top:50%; width:10px; height:10px; margin:-5px 0 0 -5px; border-radius:50%; background:var(--bg)}
+.wordmark{font:800 1.05rem/1 var(--display); letter-spacing:.02em}
+.wordmark span{color:var(--muted); font-weight:500}
+.meta{display:flex; align-items:center; gap:10px}
+.pill{display:inline-flex; align-items:center; gap:8px; height:36px; padding:0 14px; border-radius:999px;
+  border:1px solid var(--stroke); background:var(--glass); color:var(--muted); font-size:.85rem; font-weight:500;
+  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px)}
+.pill .dot{width:7px; height:7px; border-radius:50%; background:var(--light); box-shadow:0 0 10px var(--light)}
+.pill:empty{display:none}
+.lang{display:inline-flex; padding:3px; border-radius:999px; border:1px solid var(--stroke); background:var(--glass);
+  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px)}
+.lang button{border:0; background:transparent; color:var(--muted); font-weight:600; font-size:.8rem; letter-spacing:.04em;
+  height:28px; padding:0 12px; border-radius:999px; cursor:pointer; transition:color .2s, background .2s}
+.lang button[aria-pressed="true"]{background:var(--text); color:var(--bg)}
+.lang button:disabled{cursor:not-allowed}
+
+/* ---------- Hero ---------- */
+.hero{padding:64px 0 36px; max-width:860px}
+.eyebrow{display:inline-flex; align-items:center; gap:8px; font-size:.78rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--a2)}
+.eyebrow::before{content:''; width:18px; height:1px; background:currentColor}
+h1{margin:14px 0 0; font:800 clamp(2.6rem,8.5vw,6rem)/.95 var(--display); letter-spacing:-.035em}
+h1 .g{background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent}
+.tagline{margin:20px 0 0; color:var(--muted); font-size:clamp(1rem,2.2vw,1.2rem); max-width:52ch}
+
+/* ---------- Control panel ---------- */
+.panel{position:relative; border-radius:var(--r); padding:22px; background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.02));
+  border:1px solid var(--stroke); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
+  box-shadow:0 30px 80px -40px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.06)}
+.controls{display:grid; grid-template-columns:auto 1fr auto; gap:18px 28px; align-items:end}
+.field{display:flex; flex-direction:column; gap:10px; min-width:0}
+.flabel{font-size:.72rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--dim)}
+.seg{display:inline-flex; flex-wrap:wrap; gap:4px; padding:4px; border-radius:14px; background:rgba(0,0,0,.35); border:1px solid var(--stroke); width:max-content; max-width:100%}
+.seg button{--c:var(--text); border:0; background:transparent; color:var(--muted); font-weight:600; font-size:.92rem;
+  height:40px; padding:0 16px; border-radius:10px; cursor:pointer; display:inline-flex; align-items:center; gap:8px;
+  transition:color .2s, background .2s, box-shadow .2s}
+.seg button:hover:not(:disabled){color:var(--text)}
+.seg button[aria-pressed="true"]{color:var(--text); background:rgba(255,255,255,.09); box-shadow:inset 0 0 0 1px var(--stroke2)}
 .seg button:disabled{cursor:not-allowed}
+.seg .sw{width:8px; height:8px; border-radius:50%; background:var(--c); opacity:.5; transition:opacity .2s, box-shadow .2s}
+.seg button[aria-pressed="true"] .sw{opacity:1; box-shadow:0 0 10px var(--c)}
+.seg button[data-v="light"]{--c:var(--light)}
+.seg button[data-v="mid"]{--c:var(--mid)}
+.seg button[data-v="chaos"]{--c:var(--chaos)}
+.seg button[data-v="mix"] .sw{background:conic-gradient(var(--light),var(--mid),var(--chaos),var(--light))}
 
-.names{flex-basis:100%}
+.names{grid-column:1/-1}
 .name-inputs{display:grid; grid-template-columns:repeat(5,1fr); gap:8px}
-.name-inputs input{width:100%; font:500 .95rem var(--body); color:var(--gold-hi); background:rgba(1,10,19,.7);
-  border:1px solid var(--line); padding:8px 10px}
-.name-inputs input::placeholder{color:#5b6573}
-.name-inputs input:focus{border-color:var(--gold-dk)}
+.name-inputs input{width:100%; height:44px; font:500 .95rem var(--body); color:var(--text); background:rgba(0,0,0,.35);
+  border:1px solid var(--stroke); border-radius:var(--r-sm); padding:0 14px; transition:border-color .2s, background .2s}
+.name-inputs input::placeholder{color:var(--dim)}
+.name-inputs input:focus{outline:none; border-color:rgba(139,92,246,.6); background:rgba(139,92,246,.06)}
 
-.actions{display:flex; gap:12px; flex-wrap:wrap; align-items:center; flex-basis:100%}
-.spin{
-  font-family:var(--display); font-weight:700; letter-spacing:.08em; text-transform:uppercase; font-size:1.05rem;
-  color:var(--gold-hi); background:linear-gradient(180deg,#1E2328 0%,#0A1428 100%);
-  border:2px solid transparent; border-image:linear-gradient(180deg,#C8AA6E,#785A28) 1;
-  padding:14px 36px; cursor:pointer; transition:box-shadow .2s, color .2s;
-}
-.spin:hover:not(:disabled){color:#fff; box-shadow:inset 0 0 18px rgba(10,200,185,.35),0 0 20px rgba(10,200,185,.25)}
-.spin:disabled{opacity:.55; cursor:progress}
-.ghost{font:600 .95rem var(--body); color:var(--text); background:transparent; border:1px solid var(--gold-dk);
-  padding:12px 20px; cursor:pointer}
-.ghost:hover:not(:disabled){color:var(--gold-hi); border-color:var(--gold)}
-.ghost:disabled{opacity:.5; cursor:not-allowed}
+.actions{display:flex; gap:10px; align-items:center; justify-content:flex-end}
+.spin{position:relative; isolation:isolate; display:inline-flex; align-items:center; justify-content:center; gap:10px;
+  height:56px; padding:0 30px; border:0; border-radius:16px; cursor:pointer; color:#fff;
+  font:700 .95rem var(--display); letter-spacing:.02em; white-space:nowrap;
+  background:var(--grad); box-shadow:0 10px 40px -10px rgba(139,92,246,.8), inset 0 1px 0 rgba(255,255,255,.3);
+  transition:transform .2s var(--ease), box-shadow .2s, filter .2s}
+.spin::before{content:''; position:absolute; inset:-2px; z-index:-1; border-radius:18px; padding:2px;
+  background:conic-gradient(from var(--ang,0deg),transparent 0 60%,rgba(255,255,255,.9) 75%,transparent 90%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude;
+  animation:orbit 3s linear infinite; opacity:.7}
+@property --ang{syntax:'<angle>'; inherits:false; initial-value:0deg}
+@keyframes orbit{to{--ang:360deg}}
+.spin:hover:not(:disabled){transform:translateY(-1px); box-shadow:0 16px 50px -10px rgba(34,211,238,.7), inset 0 1px 0 rgba(255,255,255,.3)}
+.spin:active:not(:disabled){transform:translateY(1px) scale(.99)}
+.spin:disabled{cursor:progress; filter:saturate(.5) brightness(.8)}
+.spin:disabled::before{opacity:0}
+.spin svg{width:20px; height:20px}
+.spin.busy svg{animation:roll .7s linear infinite}
+@keyframes roll{to{transform:rotate(360deg)}}
+.ghost{display:inline-flex; align-items:center; gap:8px; height:56px; padding:0 20px; border-radius:16px; cursor:pointer;
+  border:1px solid var(--stroke2); background:var(--glass); color:var(--text); font-weight:600; font-size:.95rem;
+  transition:background .2s, border-color .2s}
+.ghost:hover:not(:disabled){background:var(--glass2); border-color:rgba(255,255,255,.25)}
+.ghost:disabled{opacity:.45; cursor:not-allowed}
+.ghost svg{width:18px; height:18px}
 
-/* Status */
-.status{margin-top:22px; color:var(--muted)}
+/* ---------- Status ---------- */
+.status{margin-top:20px; color:var(--muted); display:flex; align-items:center; gap:10px}
 .status:empty{display:none}
-.status .err{color:var(--gold-hi); border-left:3px solid var(--red); padding:10px 14px; background:rgba(232,64,87,.08); display:flex; gap:14px; align-items:center; flex-wrap:wrap}
+.status .ld{width:16px; height:16px; border-radius:50%; border:2px solid var(--stroke2); border-top-color:var(--a2); animation:roll .8s linear infinite}
+.status .err{flex:1; display:flex; gap:14px; align-items:center; justify-content:space-between; flex-wrap:wrap; color:var(--text);
+  padding:14px 18px; border-radius:var(--r-sm); background:rgba(255,59,107,.08); border:1px solid rgba(255,59,107,.3)}
 .status .err p{margin:0}
+.status .ghost{height:40px}
 
-/* Result */
-.result{margin-top:24px}
-.empty{border:1px dashed var(--line); padding:36px 20px; text-align:center; color:var(--muted)}
-.team{display:grid; grid-template-columns:minmax(0,1fr); gap:16px}
-.pblock{min-width:0}
+/* ---------- Result shell ---------- */
+.result{margin-top:28px; scroll-margin-top:20px}
 
-/* Reel */
-.reel{position:relative; overflow:hidden; border:1px solid var(--gold-dk);
-  background:linear-gradient(180deg,#06101c,#0a1628); padding:12px 0; --cell:104px}
-.reel.sm{--cell:64px; padding:8px 0}
-.reel::before,.reel::after{content:''; position:absolute; top:0; bottom:0; width:16%; z-index:2; pointer-events:none}
-.reel::before{left:0; background:linear-gradient(90deg,var(--abyss),transparent)}
-.reel::after{right:0; background:linear-gradient(270deg,var(--abyss),transparent)}
-.strip{display:flex; gap:8px; will-change:transform}
-.cell{flex:0 0 var(--cell); height:var(--cell); border:1px solid var(--line); background:#000}
-.cell img{width:100%; height:100%; display:block; object-fit:cover}
-.reel.landed .cell.w{border-color:var(--gold); box-shadow:0 0 0 2px var(--gold),0 0 26px rgba(200,170,110,.55)}
-.reel.landed .cell:not(.w){opacity:.35; transition:opacity .4s}
-.marker{position:absolute; left:50%; top:0; bottom:0; width:2px; transform:translateX(-50%); z-index:3;
-  background:linear-gradient(180deg,var(--gold) 0,transparent 22%,transparent 78%,var(--gold) 100%)}
-.marker::before,.marker::after{content:''; position:absolute; left:50%; transform:translateX(-50%);
-  border-left:9px solid transparent; border-right:9px solid transparent}
-.marker::before{top:0; border-top:11px solid var(--gold)}
-.marker::after{bottom:0; border-bottom:11px solid var(--gold)}
-.reel.landed .marker{opacity:0; transition:opacity .4s}
+/* Idle state */
+.idle{position:relative; border-radius:var(--r); border:1px solid var(--stroke); background:var(--glass); overflow:hidden; padding:56px 20px}
+.idle .marquee{position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center; gap:12px; opacity:.32;
+  mask-image:linear-gradient(90deg,transparent,#000 18%,#000 82%,transparent); -webkit-mask-image:linear-gradient(90deg,transparent,#000 18%,#000 82%,transparent)}
+.idle .row{display:flex; gap:12px; width:max-content; animation:slide 70s linear infinite}
+.idle .row.r2{animation-direction:reverse; animation-duration:90s}
+.idle .row img{width:64px; height:64px; border-radius:14px; filter:grayscale(.6)}
+@keyframes slide{to{transform:translateX(-50%)}}
+.idle .msg{position:relative; text-align:center}
+.idle .msg b{display:block; font:700 clamp(1.4rem,3.5vw,2rem)/1.15 var(--display); letter-spacing:-.02em}
+.idle .msg span{display:block; margin-top:8px; color:var(--muted)}
+.idle::after{content:''; position:absolute; inset:0; background:radial-gradient(ellipse 50% 70% at 50% 50%,rgba(6,6,11,.9),transparent 80%); pointer-events:none}
+.idle .msg{z-index:1}
 
-/* Card */
-.card{position:relative; margin-top:16px; border:1px solid var(--gold-dk); background:var(--panel); overflow:hidden;
-  opacity:0; transform:translateY(8px); transition:opacity .5s ease, transform .5s ease}
-.card.show{opacity:1; transform:none}
-.card .art{position:absolute; inset:0; background-size:cover; background-position:center 18%; opacity:.5}
-.card .art::after{content:''; position:absolute; inset:0;
-  background:linear-gradient(90deg,var(--panel) 28%,rgba(11,26,44,.72) 62%,rgba(11,26,44,.25) 100%)}
-.card .body{position:relative; padding:26px; display:grid; gap:20px}
-.who{display:flex; flex-direction:column; gap:2px}
-.cname{margin:0; font-family:var(--display); font-weight:700; line-height:1.05; color:var(--gold-hi);
-  font-size:clamp(2rem,5.5vw,3rem)}
-.ctitle{margin:0; color:var(--text); font-style:italic}
-.lane{align-self:flex-start; margin-top:10px; font:600 .85rem var(--body); color:var(--hex);
-  border:1px solid rgba(10,200,185,.45); padding:3px 10px}
-.grid{display:grid; grid-template-columns:auto 1fr; gap:18px 36px}
-.blk h3{margin:0 0 8px; font:600 .95rem var(--display); color:var(--gold); letter-spacing:.03em}
-.blk.wide{grid-column:1/-1}
-.icons{display:flex; gap:8px}
-.icons img{width:42px; height:42px; border:1px solid var(--gold-dk); display:block}
-.runes{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
-.ks{width:56px; height:56px; display:block}
-.rmeta{display:flex; flex-direction:column}
-.rmeta b{font-weight:600; color:var(--gold-hi)}
-.rmeta span{font-size:.9rem; color:var(--muted)}
-.rsmall{display:flex; align-items:center; gap:4px}
-.rsmall img{width:28px; height:28px; border-radius:50%; background:rgba(0,0,0,.45); display:block}
-.rsmall i{width:1px; height:22px; background:var(--line); margin:0 4px}
-.items{list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:8px 18px}
-.items li{display:flex; align-items:center; gap:10px; color:var(--gold-hi); min-width:0}
-.items li span{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-.items img{width:42px; height:42px; border:1px solid var(--gold-dk); flex:none; display:block}
-.rule{--c:var(--gold); --bg:rgba(200,170,110,.08); border-left:3px solid var(--c);
-  background:linear-gradient(90deg,var(--bg),transparent 85%); padding:14px 18px}
-.rule.lv-light{--c:var(--hex); --bg:rgba(10,200,185,.09)}
-.rule.lv-chaos{--c:var(--red); --bg:rgba(232,64,87,.1)}
-.rule .badge{font:700 .85rem var(--display); color:var(--c); letter-spacing:.05em}
-.rule p{margin:4px 0 0; font-size:1.15rem; color:var(--gold-hi); max-width:62ch}
+/* ---------- Reels ---------- */
+.reel{position:relative; overflow:hidden; border-radius:var(--r); border:1px solid var(--stroke);
+  background:linear-gradient(180deg,rgba(0,0,0,.45),rgba(0,0,0,.25)); --cell:128px; --gap:12px; padding:18px 0}
+.reel .strip{display:flex; gap:var(--gap); will-change:transform}
+.reel .cell{flex:0 0 var(--cell); width:var(--cell); height:var(--cell); border-radius:16px; overflow:hidden; background:#111;
+  transition:opacity .5s, transform .5s var(--ease), filter .5s}
+.reel .cell img{width:100%; height:100%; object-fit:cover; transform:scale(1.08)}
+.reel::before,.reel::after{content:''; position:absolute; z-index:2; pointer-events:none}
+.reel:not(.v)::before{left:0; top:0; bottom:0; width:22%; background:linear-gradient(90deg,var(--bg),transparent)}
+.reel:not(.v)::after{right:0; top:0; bottom:0; width:22%; background:linear-gradient(270deg,var(--bg),transparent)}
+.frame{position:absolute; z-index:3; left:50%; top:50%; width:calc(var(--cell) + 14px); height:calc(var(--cell) + 14px);
+  transform:translate(-50%,-50%); border-radius:20px; pointer-events:none;
+  box-shadow:0 0 0 2px rgba(255,255,255,.85),0 0 30px rgba(34,211,238,.45), inset 0 0 30px rgba(139,92,246,.35)}
+.frame::before,.frame::after{content:''; position:absolute; left:50%; width:0; height:0; transform:translateX(-50%);
+  border-left:8px solid transparent; border-right:8px solid transparent}
+.frame::before{top:-14px; border-top:10px solid #fff}
+.frame::after{bottom:-14px; border-bottom:10px solid #fff}
+.reel.spinning .strip{animation:blur var(--ms) linear both}
+@keyframes blur{0%{filter:blur(0)} 8%{filter:blur(3px)} 55%{filter:blur(2px)} 80%,100%{filter:blur(0)}}
+.reel.landed .cell:not(.w){opacity:.22; filter:grayscale(1)}
+.reel.landed .cell.w{transform:scale(1.06)}
+.reel.landed .frame{animation:pop .9s var(--ease)}
+@keyframes pop{0%{box-shadow:0 0 0 2px #fff,0 0 0 0 rgba(34,211,238,.9)} 100%{box-shadow:0 0 0 2px rgba(255,255,255,.85),0 0 0 26px rgba(34,211,238,0)}}
 
-/* Team blocks */
-.pblock.compact{border:1px solid var(--line); background:rgba(9,20,40,.7)}
-.phead{display:flex; justify-content:space-between; align-items:center; gap:10px; padding:10px 14px; border-bottom:1px solid var(--line)}
-.pname{font:700 1.05rem var(--display); color:var(--gold-hi); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-.phead .lane{margin:0}
-.pblock.compact .reel{border-left:0; border-right:0; border-top:0}
-.card.compact{margin:0; border:0; background:transparent}
-.card.compact .body{padding:14px; gap:12px}
-.card.compact .ctitle,.card.compact .who .lane,.card.compact .rsmall,.card.compact .rmeta span{display:none}
-.card.compact .cname{font-size:1.4rem}
-.card.compact .grid{grid-template-columns:repeat(3,auto); justify-content:start; gap:10px 28px}
-.card.compact .blk.wide{grid-column:auto}
-.card.compact .items{display:flex; gap:4px}
-.card.compact .items span{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0)}
-.card.compact .items img,.card.compact .icons img{width:32px; height:32px}
-.card.compact .ks{width:36px; height:36px}
-.card.compact .rule{padding:10px 14px}
-.card.compact .rule p{font-size:1rem}
+/* vertical (team) reels */
+.slot{container-type:inline-size}
+.reel.v{--vc:min(100cqw - 24px,120px); --gap:10px; padding:0; height:calc(var(--vc) * 2.5)}
+.reel.v .strip{flex-direction:column; align-items:center}
+.reel.v .cell{flex:none; width:var(--vc); height:var(--vc)}
+.reel.v::before{left:0; right:0; top:0; height:26%; background:linear-gradient(180deg,var(--bg),transparent)}
+.reel.v::after{left:0; right:0; bottom:0; height:26%; background:linear-gradient(0deg,var(--bg),transparent)}
+.reel.v .frame{width:calc(var(--vc) + 10px); height:calc(var(--vc) + 10px); border-radius:18px}
+.reel.v .frame::before,.reel.v .frame::after{display:none}
 
-footer{margin-top:40px; color:#5b6573; font-size:.8rem; max-width:70ch}
+/* ---------- Tiles ---------- */
+.tile{position:relative; border-radius:var(--r); border:1px solid var(--stroke); background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));
+  padding:22px; min-width:0; overflow:hidden}
+.tile h3{margin:0 0 14px; font-size:.72rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--dim)}
+.card{opacity:0}
+.card.show{opacity:1}
+.card.show .tile,.card.show .ti{animation:rise .7s var(--ease) both; animation-delay:calc(var(--i,0) * 70ms)}
+@keyframes rise{from{opacity:0; transform:translateY(14px)}to{opacity:1; transform:none}}
 
-.toast{position:fixed; left:50%; bottom:24px; transform:translate(-50%,20px); opacity:0; pointer-events:none;
-  background:var(--navy); color:var(--gold-hi); border:1px solid var(--gold); padding:10px 18px;
-  transition:opacity .25s, transform .25s; z-index:10}
+/* lane chip */
+.lane{display:inline-flex; align-items:center; gap:6px; height:30px; padding:0 12px 0 9px; border-radius:999px;
+  background:rgba(34,211,238,.1); border:1px solid rgba(34,211,238,.35); color:#a5f3fc; font-size:.82rem; font-weight:600; white-space:nowrap}
+.lane svg{width:16px; height:16px}
+
+/* difficulty chip */
+.lv{--c:var(--mid); display:inline-flex; align-items:center; gap:7px; font-size:.72rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--c)}
+.lv::before{content:''; width:8px; height:8px; border-radius:50%; background:var(--c); box-shadow:0 0 12px var(--c)}
+.lv-light{--c:var(--light)} .lv-mid{--c:var(--mid)} .lv-chaos{--c:var(--chaos)}
+
+/* ---------- Solo bento ---------- */
+.solo{display:grid; gap:16px}
+.bento{display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); gap:16px}
+.hero-tile{grid-column:1/-1; min-height:380px; padding:0; display:flex; align-items:flex-end; border-color:var(--stroke2)}
+.hero-tile .art{position:absolute; inset:0; background-size:cover; background-position:center 22%; transform:scale(1.04);
+  transition:transform 6s var(--ease)}
+.card.show .hero-tile .art{transform:scale(1)}
+.hero-tile::after{content:''; position:absolute; inset:0; background:
+  linear-gradient(0deg,rgba(6,6,11,.96) 0%,rgba(6,6,11,.55) 38%,transparent 70%),
+  linear-gradient(90deg,rgba(6,6,11,.7) 0%,transparent 55%)}
+.hero-tile .shine{position:absolute; inset:0; z-index:1; background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.18) 50%,transparent 65%);
+  transform:translateX(-100%)}
+.card.show .hero-tile .shine{animation:shine 1.4s .2s var(--ease) both}
+@keyframes shine{to{transform:translateX(100%)}}
+.hero-tile .who{position:relative; z-index:2; padding:30px; display:flex; flex-direction:column; gap:10px}
+.cname{margin:0; font:800 clamp(2.4rem,7vw,4.6rem)/.95 var(--display); letter-spacing:-.035em; text-shadow:0 4px 30px rgba(0,0,0,.6)}
+.ctitle{margin:0; color:#d4d4e0; font-size:clamp(1rem,2vw,1.15rem)}
+.ctitle::first-letter{text-transform:uppercase}
+.who .lane{align-self:flex-start; margin-top:6px}
+
+.rule-tile{grid-column:span 7; --c:var(--mid); border-color:color-mix(in srgb,var(--c) 35%,transparent);
+  background:radial-gradient(120% 140% at 0% 0%,color-mix(in srgb,var(--c) 16%,transparent),transparent 60%),linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.015))}
+.rule-tile.lv-light{--c:var(--light)} .rule-tile.lv-chaos{--c:var(--chaos)}
+.rule-tile .lv{margin-bottom:14px}
+.rule-tile p{margin:0; font:600 clamp(1.2rem,2.6vw,1.6rem)/1.3 var(--body); letter-spacing:-.01em; text-wrap:balance}
+.spells-tile{grid-column:span 5}
+.spells{display:flex; flex-direction:column; gap:10px}
+.spell{display:flex; align-items:center; gap:14px; font-weight:600}
+.spell img{width:52px; height:52px; border-radius:14px; border:1px solid var(--stroke2)}
+.runes-tile{grid-column:span 5}
+.ks-row{display:flex; align-items:center; gap:16px}
+.ks{width:72px; height:72px; flex:none; border-radius:50%; background:radial-gradient(circle,rgba(139,92,246,.35),rgba(0,0,0,.4) 70%); padding:6px;
+  box-shadow:0 0 0 1px var(--stroke2),0 0 30px rgba(139,92,246,.3)}
+.ks-row b{display:block; font-size:1.1rem; font-weight:700}
+.ks-row span{display:block; color:var(--muted); font-size:.9rem}
+.rsmall{display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:18px}
+.rsmall img{width:36px; height:36px; border-radius:50%; background:rgba(0,0,0,.45); padding:3px; box-shadow:0 0 0 1px var(--stroke)}
+.rsmall i{width:1px; height:26px; background:var(--stroke2); margin:0 4px}
+.build-tile{grid-column:span 7}
+.items{list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px}
+.items li{display:flex; align-items:center; gap:12px; padding:8px; border-radius:14px; background:rgba(0,0,0,.25); border:1px solid var(--stroke); min-width:0}
+.items .ic{position:relative; flex:none}
+.items img{width:44px; height:44px; border-radius:10px}
+.items .n{position:absolute; top:-6px; left:-6px; width:20px; height:20px; border-radius:50%; display:grid; place-items:center;
+  background:var(--text); color:var(--bg); font-size:.7rem; font-weight:700}
+.items .nm{overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:600; font-size:.95rem}
+
+/* ---------- Team ---------- */
+.team{display:grid; gap:20px}
+.slots{display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:14px}
+.slot{display:flex; flex-direction:column; gap:10px; min-width:0}
+.shead{display:flex; align-items:center; justify-content:space-between; gap:8px; min-width:0}
+.pname{font-weight:700; font-size:.95rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0}
+.cards{display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:14px}
+.tcard{display:flex; flex-direction:column; min-width:0}
+.tcard .tile{padding:0; display:flex; flex-direction:column; height:100%}
+.tcard .tart{position:relative; aspect-ratio:4/4.4; overflow:hidden; background:#111}
+.tcard .tart img{width:100%; height:100%; object-fit:cover; object-position:center 18%}
+.tcard .tart::after{content:''; position:absolute; inset:0; background:linear-gradient(0deg,rgba(10,10,18,1) 0%,rgba(10,10,18,.2) 45%,transparent 70%)}
+.tcard .tname{position:absolute; z-index:1; left:14px; right:14px; bottom:10px}
+.tcard .tname b{display:block; font:700 1.15rem/1.1 var(--display); letter-spacing:-.02em; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.tcard .tname span{display:block; color:var(--muted); font-size:.8rem; margin-top:3px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.tcard .tbody{padding:14px; display:flex; flex-direction:column; gap:14px; flex:1}
+.kit{display:flex; align-items:center; gap:6px}
+.kit img{width:34px; height:34px; border-radius:9px; border:1px solid var(--stroke)}
+.kit .ksm{width:38px; height:38px; border-radius:50%; border:0; background:rgba(0,0,0,.45); padding:3px; box-shadow:0 0 0 1px var(--stroke2); margin-left:auto}
+.kit .tree{width:26px; height:26px; border:0; border-radius:0; opacity:.8}
+.titems{display:grid; grid-template-columns:repeat(3,1fr); gap:6px}
+.titems img{width:100%; aspect-ratio:1; height:auto; border-radius:9px; border:1px solid var(--stroke)}
+.trule{margin-top:auto; padding-top:12px; border-top:1px solid var(--stroke)}
+.trule p{margin:6px 0 0; font-weight:600; font-size:.92rem; line-height:1.35}
+
+/* ---------- Footer & toast ---------- */
+footer{margin-top:64px; padding-top:24px; border-top:1px solid var(--stroke); color:var(--dim); font-size:.78rem; max-width:80ch}
+footer p{margin:0}
+.toast{position:fixed; left:50%; bottom:24px; transform:translate(-50%,20px); opacity:0; pointer-events:none; z-index:10;
+  display:flex; align-items:center; gap:10px; padding:12px 18px; border-radius:14px; font-weight:600;
+  background:rgba(20,20,30,.85); border:1px solid var(--stroke2); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  transition:opacity .25s, transform .25s var(--ease)}
 .toast.on{opacity:1; transform:translate(-50%,0)}
 .sr-only{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
 
-@media (max-width:720px){
+/* ---------- Responsive ---------- */
+@media (max-width:1020px){
+  .controls{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .actions{grid-column:1/-1; justify-content:stretch}
+  .spin{flex:1}
+  .cards{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+}
+@media (max-width:760px){
+  .wrap{padding:18px 16px 40px}
+  .hero{padding:40px 0 24px}
+  .panel{padding:16px}
+  .controls{grid-template-columns:minmax(0,1fr)}
+  .seg{width:100%; display:grid; grid-template-columns:repeat(2,minmax(0,1fr))}
+  .seg button{justify-content:center; padding:0 10px}
+  .actions{flex-direction:column-reverse; align-items:stretch}
+  .actions .ghost{justify-content:center; height:48px}
+  .spin{flex:none; width:100%}
   .name-inputs{grid-template-columns:repeat(2,1fr)}
-  .grid,.card.compact .grid{grid-template-columns:1fr}
-  .card .body{padding:20px}
-  .reel{--cell:88px}
-  .reel.sm{--cell:56px}
-  .card .art::after{background:linear-gradient(180deg,rgba(11,26,44,.55) 0%,var(--panel) 70%)}
-  .spin{flex:1 1 100%}
+  .name-inputs input:last-child{grid-column:1/-1}
+  .reel{--cell:96px; --gap:10px; padding:14px 0}
+  .reel.v{--vc:calc(100cqw - 10px); --gap:6px; border-radius:14px}
+  .reel.v .frame{width:calc(var(--vc) + 6px); height:calc(var(--vc) + 6px); border-radius:12px}
+  .reel.v .cell{border-radius:10px}
+  .slots{gap:6px}
+  .shead{flex-direction:column; align-items:center; gap:4px}
+  .shead .pname{font-size:.72rem; max-width:100%}
+  .shead .lane{height:24px; padding:0 7px; font-size:0; gap:0}
+  .shead .lane svg{width:14px; height:14px}
+  .bento{gap:12px}
+  .hero-tile{min-height:300px}
+  .hero-tile .who{padding:20px}
+  .rule-tile,.spells-tile,.runes-tile,.build-tile{grid-column:1/-1}
+  .spells{flex-direction:row; flex-wrap:wrap; gap:14px 22px}
+  .items{grid-template-columns:1fr}
+  .cards{grid-template-columns:1fr}
+  .tcard .tile{flex-direction:row}
+  .tcard .tart{aspect-ratio:auto; width:38%; flex:none}
+  .tcard .tart::after{background:linear-gradient(0deg,rgba(10,10,18,.95) 0%,transparent 60%)}
+  .tcard .tname b{font-size:.95rem; white-space:normal}
+  .tcard .tname{left:10px; right:8px}
+  .titems{grid-template-columns:repeat(6,1fr); gap:4px}
+  .titems img{border-radius:6px}
+  .kit img{width:30px; height:30px}
+  .kit .ksm{width:34px; height:34px}
 }
 @media (prefers-reduced-motion:reduce){
-  .card,.toast,.reel .cell,.marker{transition:none}
+  *,*::before,*::after{animation:none!important; transition:none!important}
 }
 </style>
 </head>
 <body>
+<div class="backdrop" aria-hidden="true">
+  <div class="glow g1"></div><div class="glow g2"></div><div class="glow g3"></div>
+  <div class="splash" id="bgsplash"></div>
+  <div class="grid"></div><div class="noise"></div>
+</div>
+
 <div class="wrap">
   <header>
-    <div class="brand">
-      <h1>Rift Roulette</h1>
-      <p data-t="tagline"></p>
-    </div>
+    <a class="logo" href="./" aria-label="Rift Roulette">
+      <span class="mark" aria-hidden="true"></span>
+      <span class="wordmark">RIFT <span>ROULETTE</span></span>
+    </a>
     <div class="meta">
-      <span class="patch" id="patch"></span>
+      <span class="pill" id="patch"></span>
       <div class="lang" role="group" aria-label="Idioma / Language">
         <button type="button" data-lang="pt">PT</button>
         <button type="button" data-lang="en">EN</button>
@@ -214,38 +371,50 @@ footer{margin-top:40px; color:#5b6573; font-size:.8rem; max-width:70ch}
     </div>
   </header>
 
-  <hr class="hex">
+  <section class="hero">
+    <span class="eyebrow">League of Legends</span>
+    <h1><span data-t="h1a"></span><br><span class="g" data-t="h1b"></span></h1>
+    <p class="tagline" data-t="tagline"></p>
+  </section>
 
-  <section class="controls">
-    <div class="field">
-      <span class="flabel" id="mode-l" data-t="mode"></span>
-      <div class="seg" id="mode" role="group" aria-labelledby="mode-l">
-        <button type="button" data-v="solo" data-t="solo"></button>
-        <button type="button" data-v="team" data-t="team"></button>
+  <section class="panel">
+    <div class="controls">
+      <div class="field">
+        <span class="flabel" id="mode-l" data-t="mode"></span>
+        <div class="seg" id="mode" role="group" aria-labelledby="mode-l">
+          <button type="button" data-v="solo"><span data-t="solo"></span></button>
+          <button type="button" data-v="team"><span data-t="team"></span></button>
+        </div>
       </div>
-    </div>
-    <div class="field">
-      <span class="flabel" id="level-l" data-t="level"></span>
-      <div class="seg" id="level" role="group" aria-labelledby="level-l">
-        <button type="button" data-v="light" data-t="light"></button>
-        <button type="button" data-v="mid" data-t="mid"></button>
-        <button type="button" data-v="chaos" data-t="chaos"></button>
-        <button type="button" data-v="mix" data-t="mix"></button>
+      <div class="field">
+        <span class="flabel" id="level-l" data-t="level"></span>
+        <div class="seg" id="level" role="group" aria-labelledby="level-l">
+          <button type="button" data-v="light"><i class="sw"></i><span data-t="light"></span></button>
+          <button type="button" data-v="mid"><i class="sw"></i><span data-t="mid"></span></button>
+          <button type="button" data-v="chaos"><i class="sw"></i><span data-t="chaos"></span></button>
+          <button type="button" data-v="mix"><i class="sw"></i><span data-t="mix"></span></button>
+        </div>
       </div>
-    </div>
-    <div class="field names" id="names" hidden>
-      <span class="flabel" data-t="names"></span>
-      <div class="name-inputs">
-        <input type="text" maxlength="24" autocomplete="off">
-        <input type="text" maxlength="24" autocomplete="off">
-        <input type="text" maxlength="24" autocomplete="off">
-        <input type="text" maxlength="24" autocomplete="off">
-        <input type="text" maxlength="24" autocomplete="off">
+      <div class="actions">
+        <button type="button" class="ghost" id="copy" hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>
+          <span data-t="copy"></span>
+        </button>
+        <button type="button" class="spin" id="spin" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg>
+          <span id="spin-l"></span>
+        </button>
       </div>
-    </div>
-    <div class="actions">
-      <button type="button" class="spin" id="spin" disabled></button>
-      <button type="button" class="ghost" id="copy" hidden data-t="copy"></button>
+      <div class="field names" id="names" hidden>
+        <span class="flabel" data-t="names"></span>
+        <div class="name-inputs">
+          <input type="text" maxlength="24" autocomplete="off">
+          <input type="text" maxlength="24" autocomplete="off">
+          <input type="text" maxlength="24" autocomplete="off">
+          <input type="text" maxlength="24" autocomplete="off">
+          <input type="text" maxlength="24" autocomplete="off">
+        </div>
+      </div>
     </div>
   </section>
 
@@ -256,7 +425,6 @@ footer{margin-top:40px; color:#5b6573; font-size:.8rem; max-width:70ch}
   <footer><p data-t="legal"></p></footer>
 </div>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
-
 <script>
 (() => {
 'use strict';
@@ -279,6 +447,7 @@ const T = {
     retry: 'Tentar de novo',
     badLink: 'Esse link de desafio está quebrado ou é de um patch incompatível. Gire um novo.',
     empty: 'Escolha o modo e a dificuldade, depois gire a roleta.',
+    ready: 'Pronto pra girar?', h1a: 'Gire. Aceite.', h1b: 'Sobreviva.', rolling: 'Girando…', team5: 'Seu time',
     patch: 'Patch',
     lanes: { top: 'Topo', jungle: 'Selva', mid: 'Meio', bot: 'Atirador', support: 'Suporte' },
     legal: 'Rift Roulette não é endossado pela Riot Games e não reflete as opiniões da Riot Games nem de ninguém oficialmente envolvido na produção ou gestão de League of Legends. League of Legends e Riot Games são marcas registradas da Riot Games, Inc.'
@@ -296,6 +465,7 @@ const T = {
     retry: 'Try again',
     badLink: 'This challenge link is broken or from an incompatible patch. Spin a new one.',
     empty: 'Pick a mode and difficulty, then spin the roulette.',
+    ready: 'Ready to spin?', h1a: 'Spin. Accept.', h1b: 'Survive.', rolling: 'Spinning…', team5: 'Your team',
     patch: 'Patch',
     lanes: { top: 'Top', jungle: 'Jungle', mid: 'Mid', bot: 'Bot', support: 'Support' },
     legal: "Rift Roulette isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing League of Legends. League of Legends and Riot Games are trademarks or registered trademarks of Riot Games, Inc."
@@ -355,6 +525,7 @@ const itemIcon = id => `${DD}/cdn/${S.version}/img/item/${id}.png`;
 const spellIcon = sp => `${DD}/cdn/${S.version}/img/spell/${sp.image.full}`;
 const runeIcon = r => `${DD}/cdn/img/${r.icon}`;
 const splash = id => `${DD}/cdn/img/champion/splash/${id}_0.jpg`;
+const loadArt = id => `${DD}/cdn/img/champion/loading/${id}_0.jpg`;
 
 /* ---------- link encoding ---------- */
 function enc(o) {
@@ -484,10 +655,20 @@ function rollAll() {
   };
 }
 
+
 /* ---------- render ---------- */
-function makeReel(winnerId, small) {
-  const N = 36, WIN = 30;
-  const reel = el('div', 'reel' + (small ? ' sm' : ''));
+const LANE_SVG = {
+  top: '<path d="M4 4h13l-4 4H8v5l-4 4z" fill="currentColor"/><path d="M11 20h9V11" stroke="currentColor" stroke-width="1.6" fill="none" opacity=".45"/>',
+  jungle: '<path d="M12 2.5c3.6 4.2 5.4 9 2.6 15-.9-2.6-2.6-4-4.6-5 .9 3 .1 5.6-2 8.2-2.3-6.4-.6-13 4-18.2z" fill="currentColor"/>',
+  mid: '<path d="M4 16.5 16.5 4H20v3.5L7.5 20H4z" fill="currentColor"/><path d="M4 11V4h7M13 20h7v-7" stroke="currentColor" stroke-width="1.6" fill="none" opacity=".45"/>',
+  bot: '<path d="M20 20H7l4-4h5v-5l4-4z" fill="currentColor"/><path d="M13 4H4v9" stroke="currentColor" stroke-width="1.6" fill="none" opacity=".45"/>',
+  support: '<path d="M12 3l7.5 3v5.5c0 4.6-3.1 8-7.5 9.9-4.4-1.9-7.5-5.3-7.5-9.9V6z" fill="currentColor" opacity=".3"/><path d="M12 7v10M7 12h10" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>'
+};
+const laneChip = ln => `<span class="lane"><svg viewBox="0 0 24 24" aria-hidden="true">${LANE_SVG[ln]}</svg>${esc(t('lanes')[ln])}</span>`;
+
+function makeReel(winnerId, vertical) {
+  const N = vertical ? 30 : 36, WIN = N - 6;
+  const reel = el('div', 'reel' + (vertical ? ' v' : ''));
   reel.dataset.win = WIN;
   reel.setAttribute('aria-hidden', 'true');
   const strip = el('div', 'strip');
@@ -498,113 +679,137 @@ function makeReel(winnerId, small) {
     const img = new Image(); img.alt = ''; img.decoding = 'async'; img.src = champIcon(id);
     cell.append(img); strip.append(cell);
   }
-  reel.append(strip, el('div', 'marker'));
+  reel.append(strip, el('div', 'frame'));
   return reel;
 }
 
-function makeCard(p, compact) {
-  const d = S.d, ch = d.champs[p.c], R = RULES[p.r];
-  const card = el('article', 'card ' + (compact ? 'compact' : 'solo'));
-  if (!compact) {
-    const art = el('div', 'art');
-    art.style.backgroundImage = `url("${splash(p.c)}")`;
-    card.append(art);
-  }
-  const prim = d.treeMap[p.ru[0]], sec = d.treeMap[p.ru[5]], ks = d.runeMap[p.ru[1]];
-  const small = [p.ru[2], p.ru[3], p.ru[4]].map(id => d.runeMap[id]);
-  const small2 = [p.ru[6], p.ru[7]].map(id => d.runeMap[id]);
-  const rImg = r => `<img src="${runeIcon(r)}" alt="${esc(r.name)}" title="${esc(r.name)}">`;
-  const spells = p.sp.map(id => d.spells[id]);
-  const build = (p.b ? [p.b] : []).concat(p.i).map(id => d.items[id]);
-  const ids = (p.b ? [p.b] : []).concat(p.i);
+function runeBits(p) {
+  const d = S.d;
+  return {
+    prim: d.treeMap[p.ru[0]], sec: d.treeMap[p.ru[5]], ks: d.runeMap[p.ru[1]],
+    small: [p.ru[2], p.ru[3], p.ru[4]].map(id => d.runeMap[id]),
+    small2: [p.ru[6], p.ru[7]].map(id => d.runeMap[id])
+  };
+}
+const buildIds = p => (p.b ? [p.b] : []).concat(p.i);
+const imgTag = (src, name, cls) => `<img${cls ? ` class="${cls}"` : ''} src="${src}" alt="${esc(name)}" title="${esc(name)}" loading="lazy">`;
 
-  const body = el('div', 'body');
-  body.innerHTML = `
-    <div class="who">
-      <h2 class="cname">${esc(ch.name)}</h2>
-      <p class="ctitle">${esc(ch.title)}</p>
-      <span class="lane">${esc(t('lanes')[p.ln])}</span>
-    </div>
-    <div class="grid">
-      <div class="blk">
-        <h3>${esc(t('spells'))}</h3>
-        <div class="icons">${spells.map(sp => `<img src="${spellIcon(sp)}" alt="${esc(sp.name)}" title="${esc(sp.name)}">`).join('')}</div>
+function soloCard(p) {
+  const d = S.d, ch = d.champs[p.c], R = RULES[p.r], rb = runeBits(p);
+  const card = el('div', 'card bento');
+  card.innerHTML = `
+    <article class="tile hero-tile" style="--i:0">
+      <div class="art" style="background-image:url('${splash(p.c)}')"></div>
+      <div class="shine"></div>
+      <div class="who">
+        ${laneChip(p.ln)}
+        <h2 class="cname">${esc(ch.name)}</h2>
+        <p class="ctitle">${esc(ch.title)}</p>
       </div>
-      <div class="blk">
-        <h3>${esc(t('runes'))}</h3>
-        <div class="runes">
-          <img class="ks" src="${runeIcon(ks)}" alt="${esc(ks.name)}" title="${esc(ks.name)}">
-          <div class="rmeta"><b>${esc(ks.name)}</b><span>${esc(prim.name)} + ${esc(sec.name)}</span></div>
-          <div class="rsmall">${small.map(rImg).join('')}<i></i>${small2.map(rImg).join('')}</div>
-        </div>
-      </div>
-      <div class="blk wide">
-        <h3>${esc(t('build'))}</h3>
-        <ul class="items">${build.map((it, k) => `<li><img src="${itemIcon(ids[k])}" alt="" title="${esc(it.name)}"><span>${esc(it.name)}</span></li>`).join('')}</ul>
-      </div>
-    </div>
-    <div class="rule lv-${R.lv}">
-      <span class="badge">${esc(t('rule'))}: ${esc(t(R.lv))}</span>
+    </article>
+    <section class="tile rule-tile lv-${R.lv}" style="--i:1">
+      <span class="lv lv-${R.lv}">${esc(t('rule'))} · ${esc(t(R.lv))}</span>
       <p>${esc(R[S.lang])}</p>
-    </div>`;
-  card.append(body);
+    </section>
+    <section class="tile spells-tile" style="--i:2">
+      <h3>${esc(t('spells'))}</h3>
+      <div class="spells">${p.sp.map(id => d.spells[id]).map(sp =>
+        `<div class="spell">${imgTag(spellIcon(sp), sp.name)}<span>${esc(sp.name)}</span></div>`).join('')}</div>
+    </section>
+    <section class="tile runes-tile" style="--i:3">
+      <h3>${esc(t('runes'))}</h3>
+      <div class="ks-row">${imgTag(runeIcon(rb.ks), rb.ks.name, 'ks')}
+        <div><b>${esc(rb.ks.name)}</b><span>${esc(rb.prim.name)} + ${esc(rb.sec.name)}</span></div></div>
+      <div class="rsmall">${rb.small.map(r => imgTag(runeIcon(r), r.name)).join('')}<i></i>${rb.small2.map(r => imgTag(runeIcon(r), r.name)).join('')}</div>
+    </section>
+    <section class="tile build-tile" style="--i:4">
+      <h3>${esc(t('build'))}</h3>
+      <ol class="items">${buildIds(p).map((id, k) => `<li><span class="ic">${imgTag(itemIcon(id), d.items[id].name)}<span class="n">${k + 1}</span></span><span class="nm">${esc(d.items[id].name)}</span></li>`).join('')}</ol>
+    </section>`;
   return card;
 }
 
-function playerBlock(p, compact, idx) {
-  const b = el('section', 'pblock' + (compact ? ' compact' : ''));
-  if (compact) {
-    const head = el('div', 'phead');
-    head.innerHTML = `<span class="pname">${esc(p.n || `${t('player')} ${idx + 1}`)}</span><span class="lane">${esc(t('lanes')[p.ln])}</span>`;
-    b.append(head);
-  }
-  b.append(makeReel(p.c, compact), makeCard(p, compact));
-  return b;
+function teamCard(p, k) {
+  const d = S.d, ch = d.champs[p.c], R = RULES[p.r], rb = runeBits(p);
+  const card = el('div', 'card tcard');
+  card.innerHTML = `
+    <article class="tile" style="--i:${k}">
+      <div class="tart"><img src="${loadArt(p.c)}" alt="" loading="lazy">
+        <div class="tname"><b>${esc(ch.name)}</b><span>${esc(p.n || `${t('player')} ${k + 1}`)} · ${esc(t('lanes')[p.ln])}</span></div></div>
+      <div class="tbody">
+        <div class="kit">${p.sp.map(id => d.spells[id]).map(sp => imgTag(spellIcon(sp), sp.name)).join('')}
+          ${imgTag(runeIcon(rb.ks), `${rb.ks.name} (${rb.prim.name} + ${rb.sec.name})`, 'ksm')}${imgTag(runeIcon(rb.sec), rb.sec.name, 'tree')}</div>
+        <div class="titems">${buildIds(p).map(id => imgTag(itemIcon(id), d.items[id].name)).join('')}</div>
+        <div class="trule"><span class="lv lv-${R.lv}">${esc(t(R.lv))}</span><p>${esc(R[S.lang])}</p></div>
+      </div>
+    </article>`;
+  return card;
 }
 
 function reelOffset(reel) {
-  const cells = reel.firstChild.children;
-  const w = cells[0].offsetWidth;
-  return cells[+reel.dataset.win].offsetLeft + w / 2 - reel.clientWidth / 2;
+  const cell = reel.firstChild.children[+reel.dataset.win];
+  return reel.classList.contains('v')
+    ? cell.offsetTop + cell.offsetHeight / 2 - reel.clientHeight / 2
+    : cell.offsetLeft + cell.offsetWidth / 2 - reel.clientWidth / 2;
+}
+function place(reel, x) {
+  reel.firstChild.style.transform = reel.classList.contains('v') ? `translateY(${-x}px)` : `translateX(${-x}px)`;
 }
 
-function spinBlock(block, ms) {
+function spinReel(reel, card, ms) {
   return new Promise(res => {
-    const reel = block.querySelector('.reel'), strip = reel.firstChild, card = block.querySelector('.card');
-    const x = reelOffset(reel);
-    const done = () => { reel.classList.add('landed'); card.classList.add('show'); res(); };
-    if (!ms) {
-      strip.style.transition = 'none';
-      strip.style.transform = `translateX(${-x}px)`;
-      done(); return;
-    }
+    const strip = reel.firstChild;
+    const done = () => { reel.classList.remove('spinning'); reel.classList.add('landed'); card.classList.add('show'); res(); };
+    reel.classList.remove('landed');
     strip.style.transition = 'none';
-    strip.style.transform = 'translateX(0)';
+    if (!ms) { place(reel, reelOffset(reel)); done(); return; }
+    place(reel, 0);
     void strip.offsetWidth;
-    strip.style.transition = `transform ${ms}ms cubic-bezier(.08,.6,.12,1)`;
-    strip.style.transform = `translateX(${-x}px)`;
+    reel.style.setProperty('--ms', ms + 'ms');
+    reel.classList.add('spinning');
+    strip.style.transition = `transform ${ms}ms cubic-bezier(.1,.62,.1,1)`;
+    place(reel, reelOffset(reel));
     setTimeout(done, ms + 60);
   });
+}
+
+function setBackdrop(id) {
+  const bg = $('#bgsplash');
+  if (!id) { bg.classList.remove('on'); return; }
+  const img = new Image();
+  img.onload = () => { bg.style.backgroundImage = `url('${img.src}')`; bg.classList.add('on'); };
+  img.src = splash(id);
 }
 
 async function renderResult(animate) {
   const res = S.result, box = $('#result');
   box.innerHTML = '';
-  let blocks;
+  const pairs = [];
   if (res.m === 's') {
-    blocks = [playerBlock(res.p[0], false, 0)];
-    box.append(blocks[0]);
+    const wrap = el('div', 'solo');
+    const reel = makeReel(res.p[0].c, false), card = soloCard(res.p[0]);
+    wrap.append(reel, card); box.append(wrap);
+    pairs.push([reel, card]);
   } else {
-    const list = el('div', 'team');
-    blocks = res.p.map((p, k) => playerBlock(p, true, k));
-    list.append(...blocks);
-    box.append(list);
+    const wrap = el('div', 'team'), slots = el('div', 'slots'), cards = el('div', 'cards');
+    res.p.forEach((p, k) => {
+      const slot = el('div', 'slot');
+      const head = el('div', 'shead');
+      head.innerHTML = `<span class="pname">${esc(p.n || `${t('player')} ${k + 1}`)}</span>${laneChip(p.ln)}`;
+      const reel = makeReel(p.c, true), card = teamCard(p, k);
+      slot.append(head, reel); slots.append(slot); cards.append(card);
+      pairs.push([reel, card]);
+    });
+    wrap.append(slots, cards); box.append(wrap);
   }
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const anim = animate && !reduce;
+  if (anim) setBackdrop(null);
   S.spinning = true; syncUI();
-  await Promise.all(blocks.map((b, k) => spinBlock(b, anim ? (res.m === 's' ? 4200 : 2600 + k * 450) : 0)));
+  await Promise.all(pairs.map(([reel, card], k) =>
+    spinReel(reel, card, anim ? (res.m === 's' ? 4600 : 2600 + k * 500) : 0)));
   S.spinning = false; syncUI();
+  setBackdrop(res.m === 's' ? res.p[0].c : null);
   announce();
 }
 
@@ -615,7 +820,14 @@ function announce() {
 }
 
 function renderEmpty() {
-  $('#result').innerHTML = `<div class="empty">${esc(t('empty'))}</div>`;
+  const ids = shuffle(S.d.champList).slice(0, 40).map(c => c.id);
+  const row = list => list.concat(list).map(id => `<img src="${champIcon(id)}" alt="" loading="lazy">`).join('');
+  $('#result').innerHTML = `
+    <div class="idle">
+      <div class="marquee" aria-hidden="true"><div class="row">${row(ids.slice(0, 20))}</div><div class="row r2">${row(ids.slice(20))}</div></div>
+      <div class="msg"><b>${esc(t('ready'))}</b><span>${esc(t('empty'))}</span></div>
+    </div>`;
+  setBackdrop(null);
 }
 
 /* ---------- UI state ---------- */
@@ -626,7 +838,7 @@ function applyTexts() {
     inp.placeholder = `${t('player')} ${k + 1}`;
     inp.setAttribute('aria-label', `${t('player')} ${k + 1}`);
   });
-  $('#patch').textContent = S.version ? `${t('patch')} ${S.version}` : '';
+  $('#patch').innerHTML = S.version ? `<i class="dot"></i>${esc(t('patch'))} ${esc(S.version)}` : '';
   if (!S.result && S.d) renderEmpty();
   syncUI();
 }
@@ -639,7 +851,8 @@ function syncUI() {
   $('#names').hidden = S.mode !== 'team';
   $$('.name-inputs input').forEach((inp, k) => { if (document.activeElement !== inp) inp.value = S.names[k]; });
   const spin = $('#spin');
-  spin.textContent = S.result ? t('again') : t('spin');
+  $('#spin-l').textContent = S.spinning ? t('rolling') : S.result ? t('again') : t('spin');
+  spin.classList.toggle('busy', S.spinning);
   spin.disabled = busy || !S.d;
   const copy = $('#copy');
   copy.hidden = !S.result;
@@ -648,7 +861,7 @@ function syncUI() {
 
 function setStatus(kind) {
   const st = $('#status');
-  if (kind === 'loading') st.textContent = t('loading');
+  if (kind === 'loading') st.innerHTML = `<span class="ld"></span><span>${esc(t('loading'))}</span>`;
   else if (kind === 'error') {
     st.innerHTML = `<div class="err"><p>${esc(t('error'))}</p><button type="button" class="ghost" id="retry">${esc(t('retry'))}</button></div>`;
     $('#retry').onclick = boot;
@@ -679,6 +892,8 @@ async function onSpin() {
   S.result = rollAll();
   history.replaceState(null, '', '#d=' + enc(S.result));
   renderResult(true);
+  const top = $('#result').getBoundingClientRect().top;
+  if (top > innerHeight * .6 || top < 0) $('#result').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
 }
 
 async function onCopy() {
@@ -715,11 +930,7 @@ function bindOnce() {
   window.addEventListener('resize', () => {
     clearTimeout(rt);
     rt = setTimeout(() => {
-      $$('.reel.landed').forEach(reel => {
-        const strip = reel.firstChild;
-        strip.style.transition = 'none';
-        strip.style.transform = `translateX(${-reelOffset(reel)}px)`;
-      });
+      $$('.reel.landed').forEach(reel => { reel.firstChild.style.transition = 'none'; place(reel, reelOffset(reel)); });
     }, 120);
   });
 }
