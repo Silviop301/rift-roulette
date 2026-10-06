@@ -669,18 +669,11 @@ function rollAll() {
     return { v: S.version, m: 's', p: [rollPlayer(S.d, S.lane, used)] };
   }
   // Players who picked a lane get a champion from it. Random players get any champion from the
-  // whole roster, then the lanes nobody picked are handed out, matching a champion's own lanes when possible.
+  // whole roster and one of the lanes nobody picked, dealt at random, so off-role is part of the fun.
   const champs = S.teamLanes.map(l => l === 'any' ? null : rollPlayer(S.d, l, used).c);
   S.teamLanes.forEach((l, k) => { if (l === 'any') { const c = pick(S.d.champList.filter(x => !used.has(x.id))); used.add(c.id); champs[k] = c.id; } });
   const left = shuffle(LANES.filter(l => !S.teamLanes.includes(l)));
-  const lanes = S.teamLanes.slice();
-  const open = shuffle(lanes.map((l, k) => k).filter(k => lanes[k] === 'any'))
-    .sort((a, b) => S.d.champs[champs[a]].lanes.length - S.d.champs[champs[b]].lanes.length);
-  for (const k of open) {
-    const own = left.filter(l => S.d.champs[champs[k]].lanes.includes(l));
-    const ln = own.length ? pick(own) : left[0];
-    left.splice(left.indexOf(ln), 1); lanes[k] = ln;
-  }
+  const lanes = S.teamLanes.map(l => l === 'any' ? left.pop() : l);
   return {
     v: S.version, m: 't',
     p: lanes.map((ln, k) => Object.assign(rollPlayer(S.d, ln, new Set(), S.d.champs[champs[k]]), { n: S.names[k].trim().slice(0, 24) }))
