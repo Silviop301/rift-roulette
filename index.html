@@ -297,6 +297,7 @@ footer p{margin:0}
   .seg button{justify-content:center; padding:0 4px}
   #lane button{font-size:13px; gap:6px}
   .toggles{display:grid; grid-template-columns:repeat(2,minmax(0,1fr))}
+  .toggles #t-pool{grid-column:1/-1}
   .tog{justify-content:space-between; font-size:14px; padding:0 14px}
   .tog .onoff{margin-left:auto}
   .ghost{margin-left:0; justify-content:center}
@@ -384,6 +385,7 @@ footer p{margin:0}
       <div class="field f-roll">
         <span class="flabel" id="roll-l" data-t="roll"></span>
         <div class="toggles" role="group" aria-labelledby="roll-l">
+          <button type="button" class="tog" role="switch" id="t-pool"><i class="knob"></i><span data-t="pool"></span><b class="onoff"></b></button>
           <button type="button" class="tog" role="switch" id="t-runes"><i class="knob"></i><span data-t="runes"></span><b class="onoff"></b></button>
           <button type="button" class="tog" role="switch" id="t-spells"><i class="knob"></i><span data-t="spells"></span><b class="onoff"></b></button>
         </div>
@@ -461,7 +463,7 @@ const T = {
   pt: {
     tagline: 'Sorteie campeão, rota, build, runas e feitiços pra sua próxima partida. Ou pro time inteiro.',
     mode: 'Modo', solo: 'Solo', team: 'Time de 5',
-    lane: 'Rota', any: 'Aleatória', roll: 'Sortear também',
+    lane: 'Rota', any: 'Aleatória', roll: 'Sortear também', pool: 'Só campeões da rota',
     names: 'Jogadores: nome (opcional) e rota', player: 'Jogador',
     spin: 'Girar a roleta', again: 'Girar de novo', copy: 'Copiar link',
     copied: 'Link copiado', copyFail: 'Não deu pra copiar. Copie o endereço da barra do navegador.',
@@ -479,7 +481,7 @@ const T = {
   en: {
     tagline: 'Roll a champion, lane, build, runes and spells for your next game. Or for the whole team.',
     mode: 'Mode', solo: 'Solo', team: 'Team of 5',
-    lane: 'Lane', any: 'Random', roll: 'Also roll',
+    lane: 'Lane', any: 'Random', roll: 'Also roll', pool: 'Lane champions only',
     names: 'Players: name (optional) and lane', player: 'Player',
     spin: 'Spin the roulette', again: 'Spin again', copy: 'Copy link',
     copied: 'Link copied', copyFail: "Couldn't copy. Copy the address from your browser bar.",
@@ -498,7 +500,7 @@ const T = {
 
 const S = {
   lang: initialLang(), version: null, latest: null, d: null,
-  mode: 'solo', lane: 'any', teamLanes: ['any', 'any', 'any', 'any', 'any'], runes: true, spells: true, names: ['', '', '', '', ''],
+  mode: 'solo', lane: 'any', teamLanes: ['any', 'any', 'any', 'any', 'any'], runes: true, spells: true, pool: true, names: ['', '', '', '', ''],
   result: null, spinning: false, loading: false, cache: {}
 };
 
@@ -518,6 +520,7 @@ function loadPrefs() {
     if (o.lane === 'any' || LANES.includes(o.lane)) S.lane = o.lane;
     if (typeof o.runes === 'boolean') S.runes = o.runes;
     if (typeof o.spells === 'boolean') S.spells = o.spells;
+    if (typeof o.pool === 'boolean') S.pool = o.pool;
     if (Array.isArray(o.teamLanes) && o.teamLanes.length === 5) {
       const seen = new Set();
       S.teamLanes = o.teamLanes.map(l => LANES.includes(l) && !seen.has(l) ? (seen.add(l), l) : 'any');
@@ -525,7 +528,7 @@ function loadPrefs() {
   } catch (e) {}
 }
 function savePrefs() {
-  try { localStorage.setItem('rr-prefs', JSON.stringify({ lane: S.lane, runes: S.runes, spells: S.spells, teamLanes: S.teamLanes })); } catch (e) {}
+  try { localStorage.setItem('rr-prefs', JSON.stringify({ lane: S.lane, runes: S.runes, spells: S.spells, pool: S.pool, teamLanes: S.teamLanes })); } catch (e) {}
 }
 
 function initialLang() {
@@ -634,11 +637,12 @@ async function loadData(version, lang) {
 /* ---------- roll ---------- */
 function rollPlayer(d, lane, used, champ) {
   const free = d.champList.filter(c => !used.has(c.id));
-  // 'any' draws from the whole roster; the lane shown is then one the champion actually plays.
-  const fit = lane === 'any' ? free : free.filter(c => c.lanes.includes(lane));
+  // Random lane: any champion, sent to any lane. A chosen lane narrows the pool only when
+  // "lane champions only" is on.
+  const fit = lane === 'any' || !S.pool ? free : free.filter(c => c.lanes.includes(lane));
   champ = champ || pick(fit.length ? fit : free);
   used.add(champ.id);
-  if (lane === 'any') lane = pick(champ.lanes.length ? champ.lanes : LANES);
+  if (lane === 'any') lane = pick(LANES);
 
   const items = shuffle(d.legend).slice(0, 5);
   const boots = pick(d.boots);
@@ -668,8 +672,8 @@ function rollAll() {
   if (S.mode === 'solo') {
     return { v: S.version, m: 's', p: [rollPlayer(S.d, S.lane, used)] };
   }
-  // Players who picked a lane get a champion from it. Random players get any champion from the
-  // whole roster and one of the lanes nobody picked, dealt at random, so off-role is part of the fun.
+  // Players who picked a lane keep it (champion from that lane when "lane champions only" is on).
+  // Random players get any champion and one of the lanes nobody picked, dealt at random.
   const champs = S.teamLanes.map(l => l === 'any' ? null : rollPlayer(S.d, l, used).c);
   S.teamLanes.forEach((l, k) => { if (l === 'any') { const c = pick(S.d.champList.filter(x => !used.has(x.id))); used.add(c.id); champs[k] = c.id; } });
   const left = shuffle(LANES.filter(l => !S.teamLanes.includes(l)));
@@ -794,7 +798,7 @@ function spinReel(reel, card, ms) {
     };
     if (band) {
       band.classList.remove('locked');
-      band.innerHTML = `<span>${esc(t('rolling'))}</span><span class="o">/</span><span>${esc(t('lane'))} · ${esc(reel.dataset.lane === 'any' ? t('any') : t('lanes')[reel.dataset.lane])}</span>`;
+      band.innerHTML = `<span>${esc(t('rolling'))}</span><span class="o">/</span><span>${esc(t('lane'))} · ${esc(S.lane === 'any' ? t('any') : t('lanes')[S.lane])}</span>`;
     }
     reel.classList.remove('landed');
     strip.style.transition = 'none';
@@ -824,7 +828,7 @@ async function renderResult(animate) {
   const pairs = [];
   if (res.m === 's') {
     const wrap = el('div', 'solo');
-    const reel = makeReel(res.p[0].c, false, S.lane === 'any' ? 'any' : res.p[0].ln), card = soloCard(res.p[0]);
+    const reel = makeReel(res.p[0].c, false, S.lane !== 'any' && S.pool ? res.p[0].ln : 'any'), card = soloCard(res.p[0]);
     wrap.append(reel, card); box.append(wrap);
     pairs.push([reel, card]);
   } else {
@@ -833,7 +837,7 @@ async function renderResult(animate) {
       const slot = el('div', 'slot');
       const head = el('div', 'shead');
       head.innerHTML = `<span class="pname">${esc(p.n || `${t('player')} ${k + 1}`)}</span>${laneChip(p.ln)}`;
-      const reel = makeReel(p.c, true, S.teamLanes[k] === 'any' ? 'any' : p.ln), card = teamCard(p, k);
+      const reel = makeReel(p.c, true, S.teamLanes[k] !== 'any' && S.pool ? p.ln : 'any'), card = teamCard(p, k);
       slot.append(head, reel); slots.append(slot); cards.append(card);
       pairs.push([reel, card]);
     });
@@ -896,9 +900,11 @@ function syncUI() {
   $$('#mode button').forEach(b => { b.setAttribute('aria-pressed', b.dataset.v === S.mode); b.disabled = busy; });
   $$('#lane button').forEach(b => { b.setAttribute('aria-pressed', b.dataset.v === S.lane); b.disabled = busy; });
   $('#lane-f').hidden = S.mode !== 'solo';
-  [['#t-runes', S.runes], ['#t-spells', S.spells]].forEach(([q, on]) => {
+  [['#t-pool', S.pool], ['#t-runes', S.runes], ['#t-spells', S.spells]].forEach(([q, on]) => {
     $(q).setAttribute('aria-checked', on); $(q).disabled = busy; $(q + ' .onoff').textContent = on ? 'ON' : 'OFF';
   });
+  // Only matters once a lane is chosen.
+  $('#t-pool').hidden = S.mode === 'solo' ? S.lane === 'any' : S.teamLanes.every(l => l === 'any');
   $('#names').hidden = S.mode !== 'team';
   $$('.name-inputs input').forEach((inp, k) => { if (document.activeElement !== inp) inp.value = S.names[k]; });
   $$('.plane').forEach((sel, k) => {
@@ -979,6 +985,7 @@ function bindOnce() {
   $$('#mode button').forEach(b => b.addEventListener('click', () => { S.mode = b.dataset.v; syncUI(); }));
   $('#lane').innerHTML = ['any'].concat(LANES).map(ln => `<button type="button" data-v="${ln}"><svg viewBox="0 0 24 24" aria-hidden="true">${LANE_SVG[ln]}</svg><span data-t="${ln === 'any' ? 'any' : ''}" data-lane="${ln}"></span></button>`).join('');
   $$('#lane button').forEach(b => b.addEventListener('click', () => { S.lane = b.dataset.v; savePrefs(); syncUI(); }));
+  $('#t-pool').addEventListener('click', () => { S.pool = !S.pool; savePrefs(); syncUI(); });
   $('#t-runes').addEventListener('click', () => { S.runes = !S.runes; savePrefs(); syncUI(); });
   $('#t-spells').addEventListener('click', () => { S.spells = !S.spells; savePrefs(); syncUI(); });
   $$('.name-inputs input').forEach((inp, k) => inp.addEventListener('input', () => { S.names[k] = inp.value; }));
