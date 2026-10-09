@@ -260,6 +260,50 @@ h1 .g{color:var(--volt)}
 .titems{display:grid; grid-template-columns:repeat(3,1fr); gap:4px}
 .titems img{width:100%; height:auto; aspect-ratio:1}
 
+/* Skin + skill order */
+.skin{display:inline-flex; align-items:center; gap:8px; margin-top:8px; padding:5px 14px; background:var(--volt); color:var(--navy); font:700 13px var(--body); clip-path:var(--cut-sm)}
+.skin b{font:900 13px var(--display); letter-spacing:.14em; text-transform:uppercase}
+.order{display:flex; align-items:center; gap:8px; margin-top:14px}
+.order .ol{font:800 12px var(--display); letter-spacing:.16em; text-transform:uppercase; color:var(--sub); margin-right:4px}
+.order .ab{position:relative; width:46px; height:46px; display:grid; place-items:center; background:var(--deep); clip-path:var(--cut-img)}
+.order .ab img{position:absolute; inset:0; width:100%; height:100%; opacity:.9}
+.order .ab b{position:relative; font:900 22px var(--display); text-shadow:0 1px 6px #000}
+.order .ab:first-of-type{box-shadow:inset 0 0 0 2px var(--volt)}
+.order .gt{color:var(--volt); font:900 20px var(--display)}
+.tmeta{display:flex; align-items:center; gap:6px; flex-wrap:wrap; font-size:12px; color:var(--sub)}
+.tmeta .k{display:inline-flex; align-items:center; gap:4px}
+.tmeta .k b{display:grid; place-items:center; width:22px; height:22px; background:var(--deep); color:var(--text); font:900 14px var(--display); clip-path:var(--cut-sm)}
+.tmeta .k b:first-child{background:var(--volt); color:var(--navy)}
+.tmeta .k i{font-style:normal; color:var(--volt); font-weight:700}
+.tmeta .sk{flex-basis:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.tmeta .sk b{color:var(--volt); font:800 11px var(--display); letter-spacing:.12em; text-transform:uppercase; margin-right:4px}
+
+/* Exclusion list */
+.f-roll .ghost + .ghost{margin-left:0}
+.ghost .cnt{min-width:22px; height:22px; padding:0 6px; display:grid; place-items:center; background:var(--volt); color:var(--navy); font:900 13px var(--display)}
+.exd{width:min(920px,calc(100vw - 32px)); max-height:min(760px,calc(100vh - 32px)); padding:0; border:0; color:var(--text); background:var(--panel); box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.exd::backdrop{background:rgba(5,10,28,.78)}
+.exd[open]{display:flex; flex-direction:column}
+.exh{display:flex; align-items:flex-end; justify-content:space-between; gap:16px; padding:20px 22px 12px; border-bottom:1px solid var(--line)}
+.exh h2{margin:0; font:900 34px/.9 var(--display); text-transform:uppercase}
+.exh p{margin:6px 0 0; color:var(--sub); font-size:14px}
+.exh .ecount{font:900 15px var(--display); letter-spacing:.12em; text-transform:uppercase; color:var(--volt); white-space:nowrap}
+.exs{padding:12px 22px}
+.exs input{width:100%; height:44px; padding:0 14px; border:0; outline:0; background:var(--deep); color:var(--text); font:500 15px var(--body)}
+.exs input:focus{box-shadow:inset 0 0 0 2px var(--volt)}
+.exg{flex:1; overflow:auto; padding:4px 22px 16px; display:grid; grid-template-columns:repeat(auto-fill,minmax(84px,1fr)); gap:8px; align-content:start}
+.exg button{position:relative; display:flex; flex-direction:column; align-items:center; gap:4px; padding:6px 4px; border:0; background:var(--deep); color:var(--soft); cursor:pointer; font:600 11px var(--body); min-width:0}
+.exg button img{width:56px; height:56px; clip-path:var(--cut-img); transition:filter .15s, opacity .15s}
+.exg button span{max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.exg button:hover{background:rgba(255,255,255,.08)}
+.exg button[aria-pressed="true"]{color:var(--muted); box-shadow:inset 0 0 0 2px #ff4d6d}
+.exg button[aria-pressed="true"] img{filter:grayscale(1); opacity:.35}
+.exg button[aria-pressed="true"]::after{content:''; position:absolute; top:8px; left:50%; width:44px; height:3px; margin-left:-22px; background:#ff4d6d; transform:translateY(26px) rotate(-35deg)}
+.exf{display:flex; justify-content:flex-end; gap:8px; padding:12px 22px 18px; border-top:1px solid var(--line)}
+.exf .ghost{margin-left:0}
+.exf .ok{background:var(--volt); color:var(--navy); font-weight:800}
+.exf .ok:hover{background:var(--volt); filter:brightness(1.08)}
+
 /* ---------- Footer & toast ---------- */
 footer{margin-top:40px; padding:18px 0 0; border-top:1px solid rgba(255,255,255,.1); color:var(--muted); font-size:12px; line-height:1.55; max-width:80ch}
 footer p{margin:0}
@@ -298,6 +342,9 @@ footer p{margin:0}
   #lane button{font-size:13px; gap:6px}
   .toggles{display:grid; grid-template-columns:repeat(2,minmax(0,1fr))}
   .toggles #t-pool{grid-column:1/-1}
+  .exh{flex-direction:column; align-items:flex-start; gap:6px}
+  .exg{grid-template-columns:repeat(auto-fill,minmax(70px,1fr))}
+  .exg button img{width:48px; height:48px}
   .tog{justify-content:space-between; font-size:14px; padding:0 14px}
   .tog .onoff{margin-left:auto}
   .ghost{margin-left:0; justify-content:center}
@@ -388,7 +435,13 @@ footer p{margin:0}
           <button type="button" class="tog" role="switch" id="t-pool"><i class="knob"></i><span data-t="pool"></span><b class="onoff"></b></button>
           <button type="button" class="tog" role="switch" id="t-runes"><i class="knob"></i><span data-t="runes"></span><b class="onoff"></b></button>
           <button type="button" class="tog" role="switch" id="t-spells"><i class="knob"></i><span data-t="spells"></span><b class="onoff"></b></button>
+          <button type="button" class="tog" role="switch" id="t-skins"><i class="knob"></i><span data-t="skins"></span><b class="onoff"></b></button>
+          <button type="button" class="tog" role="switch" id="t-skills"><i class="knob"></i><span data-t="skills"></span><b class="onoff"></b></button>
         </div>
+        <button type="button" class="ghost" id="excl">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M6 6l12 12"/></svg>
+          <span data-t="exclude"></span><b class="cnt" id="excl-n" hidden></b>
+        </button>
         <button type="button" class="ghost" id="copy" hidden>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>
           <span data-t="copy"></span>
@@ -433,6 +486,18 @@ footer p{margin:0}
   <footer><p data-t="legal"></p></footer>
 </div>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
+<dialog class="exd" id="exd" aria-labelledby="exd-t">
+  <div class="exh">
+    <div><h2 id="exd-t" data-t="exclude"></h2><p data-t="exclNote"></p></div>
+    <span class="ecount" id="exd-n"></span>
+  </div>
+  <div class="exs"><input type="search" id="exd-q" autocomplete="off"></div>
+  <div class="exg" id="exd-g"></div>
+  <div class="exf">
+    <button type="button" class="ghost" id="exd-clear" data-t="clear"></button>
+    <button type="button" class="ghost ok" id="exd-ok" data-t="done"></button>
+  </div>
+</dialog>
 <script>
 (() => {
 'use strict';
@@ -467,7 +532,10 @@ const T = {
     names: 'Jogadores: nome (opcional) e rota', player: 'Jogador',
     spin: 'Girar a roleta', again: 'Girar de novo', copy: 'Copiar link',
     copied: 'Link copiado', copyFail: 'Não deu pra copiar. Copie o endereço da barra do navegador.',
-    spells: 'Feitiços', runes: 'Runas', build: 'Build',
+    spells: 'Feitiços', runes: 'Runas', build: 'Build', skins: 'Skin', skills: 'Ordem de skills',
+    skin: 'Skin', baseSkin: 'Clássica', maxOrder: 'Upar',
+    exclude: 'Excluir campeões', exclNote: 'Toque nos campeões que nunca devem sair na roleta.',
+    excluded: n => n === 1 ? '1 excluído' : `${n} excluídos`, search: 'Buscar campeão', clear: 'Limpar', done: 'Pronto',
     loading: 'Carregando dados do patch…',
     error: 'Não foi possível carregar os dados da Riot. Verifique a conexão e tente de novo.',
     retry: 'Tentar de novo',
@@ -485,7 +553,10 @@ const T = {
     names: 'Players: name (optional) and lane', player: 'Player',
     spin: 'Spin the roulette', again: 'Spin again', copy: 'Copy link',
     copied: 'Link copied', copyFail: "Couldn't copy. Copy the address from your browser bar.",
-    spells: 'Spells', runes: 'Runes', build: 'Build',
+    spells: 'Spells', runes: 'Runes', build: 'Build', skins: 'Skin', skills: 'Skill order',
+    skin: 'Skin', baseSkin: 'Classic', maxOrder: 'Max',
+    exclude: 'Exclude champions', exclNote: 'Tap the champions that should never come up.',
+    excluded: n => `${n} excluded`, search: 'Search champion', clear: 'Clear', done: 'Done',
     loading: 'Loading patch data…',
     error: "Couldn't load Riot data. Check your connection and try again.",
     retry: 'Try again',
@@ -500,8 +571,8 @@ const T = {
 
 const S = {
   lang: initialLang(), version: null, latest: null, d: null,
-  mode: 'solo', lane: 'any', teamLanes: ['any', 'any', 'any', 'any', 'any'], runes: true, spells: true, pool: true, names: ['', '', '', '', ''],
-  result: null, spinning: false, loading: false, cache: {}
+  mode: 'solo', lane: 'any', teamLanes: ['any', 'any', 'any', 'any', 'any'], runes: true, spells: true, pool: true, skins: true, skills: true, excl: new Set(), names: ['', '', '', '', ''],
+  result: null, spinning: false, loading: false, cache: {}, det: {}
 };
 
 /* ---------- helpers ---------- */
@@ -521,6 +592,9 @@ function loadPrefs() {
     if (typeof o.runes === 'boolean') S.runes = o.runes;
     if (typeof o.spells === 'boolean') S.spells = o.spells;
     if (typeof o.pool === 'boolean') S.pool = o.pool;
+    if (typeof o.skins === 'boolean') S.skins = o.skins;
+    if (typeof o.skills === 'boolean') S.skills = o.skills;
+    if (Array.isArray(o.excl)) S.excl = new Set(o.excl.filter(x => typeof x === 'string'));
     if (Array.isArray(o.teamLanes) && o.teamLanes.length === 5) {
       const seen = new Set();
       S.teamLanes = o.teamLanes.map(l => LANES.includes(l) && !seen.has(l) ? (seen.add(l), l) : 'any');
@@ -528,7 +602,7 @@ function loadPrefs() {
   } catch (e) {}
 }
 function savePrefs() {
-  try { localStorage.setItem('rr-prefs', JSON.stringify({ lane: S.lane, runes: S.runes, spells: S.spells, pool: S.pool, teamLanes: S.teamLanes })); } catch (e) {}
+  try { localStorage.setItem('rr-prefs', JSON.stringify({ lane: S.lane, runes: S.runes, spells: S.spells, pool: S.pool, skins: S.skins, skills: S.skills, excl: [...S.excl], teamLanes: S.teamLanes })); } catch (e) {}
 }
 
 function initialLang() {
@@ -540,8 +614,9 @@ const champIcon = id => `${DD}/cdn/${S.version}/img/champion/${id}.png`;
 const itemIcon = id => `${DD}/cdn/${S.version}/img/item/${id}.png`;
 const spellIcon = sp => `${DD}/cdn/${S.version}/img/spell/${sp.image.full}`;
 const runeIcon = r => `${DD}/cdn/img/${r.icon}`;
-const splash = id => `${DD}/cdn/img/champion/splash/${id}_0.jpg`;
-const loadArt = id => `${DD}/cdn/img/champion/loading/${id}_0.jpg`;
+const splash = (id, num) => `${DD}/cdn/img/champion/splash/${id}_${num || 0}.jpg`;
+const loadArt = (id, num) => `${DD}/cdn/img/champion/loading/${id}_${num || 0}.jpg`;
+const abilityIcon = img => `${DD}/cdn/${S.version}/img/spell/${img.full}`;
 
 /* ---------- link encoding ---------- */
 function enc(o) {
@@ -562,7 +637,9 @@ function validShape(o) {
     && o.p.every(p => p && typeof p.c === 'string' && LANES.includes(p.ln)
       && typeof p.n === 'string' && typeof p.b === 'string'
       && Array.isArray(p.i) && Array.isArray(p.ru) && (p.ru.length === 8 || p.ru.length === 0)
-      && Array.isArray(p.sp) && (p.sp.length === 2 || p.sp.length === 0));
+      && Array.isArray(p.sp) && (p.sp.length === 2 || p.sp.length === 0)
+      && (p.s === undefined || (Number.isInteger(p.s) && p.s >= 0 && p.s < 10000))
+      && (p.k === undefined || p.k === '' || /^(?!.*(.).*\1)[QWE]{3}$/.test(p.k)));
 }
 function matchesData(o, d) {
   return o.p.every(p => d.champs[p.c]
@@ -634,9 +711,30 @@ async function loadData(version, lang) {
   return d;
 }
 
+// Skins and abilities live in each champion's own file, fetched on demand and cached.
+async function champDetail(id) {
+  const loc = S.lang === 'pt' ? 'pt_BR' : 'en_US', key = `${S.version}|${loc}|${id}`;
+  if (!S.det[key]) {
+    S.det[key] = getJSON(`${DD}/cdn/${S.version}/data/${loc}/champion/${id}.json`)
+      .then(j => j.data[id])
+      .catch(e => { delete S.det[key]; throw e; });
+  }
+  return S.det[key];
+}
+async function loadDetails(res) {
+  const out = {};
+  await Promise.all(res.p.map(p => champDetail(p.c).then(d => { out[p.c] = d; }, () => {})));
+  return out;
+}
+// Champions the player excluded never come up, unless that would leave too few to roll a team.
+function rollable(d) {
+  const ok = d.champList.filter(c => !S.excl.has(c.id));
+  return ok.length >= 5 ? ok : d.champList;
+}
+
 /* ---------- roll ---------- */
 function rollPlayer(d, lane, used, champ) {
-  const free = d.champList.filter(c => !used.has(c.id));
+  const free = rollable(d).filter(c => !used.has(c.id));
   // Random lane: any champion, sent to any lane. A chosen lane narrows the pool only when
   // "lane champions only" is on.
   const fit = lane === 'any' || !S.pool ? free : free.filter(c => c.lanes.includes(lane));
@@ -665,7 +763,8 @@ function rollPlayer(d, lane, used, champ) {
       : shuffle(pool).slice(0, 2).map(x => x.id);
   }
 
-  return { n: '', c: champ.id, ln: lane, b: boots, i: items, ru, sp };
+  const k = S.skills ? shuffle(['Q', 'W', 'E']).join('') : '';
+  return { n: '', c: champ.id, ln: lane, b: boots, i: items, ru, sp, k };
 }
 function rollAll() {
   const used = new Set();
@@ -675,7 +774,7 @@ function rollAll() {
   // Players who picked a lane keep it (champion from that lane when "lane champions only" is on).
   // Random players get any champion and one of the lanes nobody picked, dealt at random.
   const champs = S.teamLanes.map(l => l === 'any' ? null : rollPlayer(S.d, l, used).c);
-  S.teamLanes.forEach((l, k) => { if (l === 'any') { const c = pick(S.d.champList.filter(x => !used.has(x.id))); used.add(c.id); champs[k] = c.id; } });
+  S.teamLanes.forEach((l, k) => { if (l === 'any') { const c = pick(rollable(S.d).filter(x => !used.has(x.id))); used.add(c.id); champs[k] = c.id; } });
   const left = shuffle(LANES.filter(l => !S.teamLanes.includes(l)));
   const lanes = S.teamLanes.map(l => l === 'any' ? left.pop() : l);
   return {
@@ -704,7 +803,7 @@ function makeReel(winnerId, vertical, lane) {
   reel.dataset.lane = lane;
   reel.setAttribute('aria-hidden', 'true');
   const strip = el('div', 'strip');
-  let others = S.d.champList.filter(c => c.id !== winnerId);
+  let others = rollable(S.d).filter(c => c.id !== winnerId);
   if (others.filter(c => c.lanes.includes(lane)).length >= 8) others = others.filter(c => c.lanes.includes(lane));
   others = shuffle(others);
   for (let k = 0; k < N; k++) {
@@ -727,20 +826,37 @@ function runeBits(p) {
     small2: [p.ru[6], p.ru[7]].map(id => d.runeMap[id])
   };
 }
+function skinName(p, det) {
+  if (!det || p.s === undefined) return '';
+  const sk = (det.skins || []).find(x => x.num === p.s);
+  if (!sk) return '';
+  return sk.num === 0 || sk.name === 'default' ? t('baseSkin') : sk.name;
+}
+function orderHTML(p, det) {
+  if (!p.k) return '';
+  const ab = { Q: 0, W: 1, E: 2 };
+  return `<div class="order" aria-label="${esc(t('skills'))}: ${p.k.split('').join(' > ')}"><span class="ol">${esc(t('maxOrder'))}</span>${p.k.split('').map((key, j) => {
+    const sp = det && det.spells && det.spells[ab[key]];
+    return `${j ? '<span class="gt">›</span>' : ''}<span class="ab"${sp ? ` title="${esc(sp.name)}"` : ''}>${sp ? `<img src="${abilityIcon(sp.image)}" alt="">` : ''}<b>${key}</b></span>`;
+  }).join('')}</div>`;
+}
 const buildIds = p => (p.b ? [p.b] : []).concat(p.i);
 const imgTag = (src, name, cls) => `<img${cls ? ` class="${cls}"` : ''} src="${src}" alt="${esc(name)}" title="${esc(name)}" loading="lazy">`;
 
-function soloCard(p) {
+function soloCard(p, det) {
   const d = S.d, ch = d.champs[p.c], rb = runeBits(p), one = !rb || !p.sp.length ? ' full' : '';
+  const sk = skinName(p, det);
   const card = el('div', 'card bento');
   card.innerHTML = `
     <article class="tile hero-tile" style="--i:0">
-      <div class="art" style="background-image:url('${splash(p.c)}')"></div>
+      <div class="art" style="background-image:url('${splash(p.c, p.s)}')"></div>
       <div class="shine"></div>
       <div class="who">
         ${laneChip(p.ln)}
         <h2 class="cname">${esc(ch.name)}</h2>
         <p class="ctitle">${esc(ch.title)}</p>
+        ${sk ? `<span class="skin"><b>${esc(t('skin'))}</b>${esc(sk)}</span>` : ''}
+        ${orderHTML(p, det)}
       </div>
     </article>
     ${p.sp.length ? `<section class="tile spells-tile${one}" style="--i:1">
@@ -761,17 +877,19 @@ function soloCard(p) {
   return card;
 }
 
-function teamCard(p, k) {
-  const d = S.d, ch = d.champs[p.c], rb = runeBits(p);
+function teamCard(p, k, det) {
+  const d = S.d, ch = d.champs[p.c], rb = runeBits(p), sk = skinName(p, det);
   const card = el('div', 'card tcard');
   card.innerHTML = `
     <article class="tile" style="--i:${k}">
-      <div class="tart"><img src="${loadArt(p.c)}" alt="" loading="lazy">
+      <div class="tart"><img src="${loadArt(p.c, p.s)}" alt="" loading="lazy">
         <div class="tname"><b>${esc(ch.name)}</b><span>${esc(p.n || `${t('player')} ${k + 1}`)} · ${esc(t('lanes')[p.ln])}</span></div></div>
       <div class="tbody">
         ${p.sp.length || rb ? `<div class="kit">${p.sp.map(id => d.spells[id]).map(sp => imgTag(spellIcon(sp), sp.name)).join('')}
           ${rb ? imgTag(runeIcon(rb.ks), `${rb.ks.name} (${rb.prim.name} + ${rb.sec.name})`, 'ksm') + imgTag(runeIcon(rb.sec), rb.sec.name, 'tree') : ''}</div>` : ''}
         <div class="titems">${buildIds(p).map(id => imgTag(itemIcon(id), d.items[id].name)).join('')}</div>
+        ${p.k || sk ? `<div class="tmeta">${p.k ? `<span class="k" title="${esc(t('skills'))}">${p.k.split('').map(x => `<b>${x}</b>`).join('<i>›</i>')}</span>` : ''}
+          ${sk ? `<span class="sk" title="${esc(sk)}"><b>${esc(t('skin'))}</b>${esc(sk)}</span>` : ''}</div>` : ''}
       </div>
     </article>`;
   return card;
@@ -824,11 +942,13 @@ function setBackdrop(id) {
 
 async function renderResult(animate) {
   const res = S.result, box = $('#result');
+  const det = await loadDetails(res);
+  if (res !== S.result) return;
   box.innerHTML = '';
   const pairs = [];
   if (res.m === 's') {
     const wrap = el('div', 'solo');
-    const reel = makeReel(res.p[0].c, false, S.lane !== 'any' && S.pool ? res.p[0].ln : 'any'), card = soloCard(res.p[0]);
+    const reel = makeReel(res.p[0].c, false, S.lane !== 'any' && S.pool ? res.p[0].ln : 'any'), card = soloCard(res.p[0], det[res.p[0].c]);
     wrap.append(reel, card); box.append(wrap);
     pairs.push([reel, card]);
   } else {
@@ -837,7 +957,7 @@ async function renderResult(animate) {
       const slot = el('div', 'slot');
       const head = el('div', 'shead');
       head.innerHTML = `<span class="pname">${esc(p.n || `${t('player')} ${k + 1}`)}</span>${laneChip(p.ln)}`;
-      const reel = makeReel(p.c, true, S.teamLanes[k] !== 'any' && S.pool ? p.ln : 'any'), card = teamCard(p, k);
+      const reel = makeReel(p.c, true, S.teamLanes[k] !== 'any' && S.pool ? p.ln : 'any'), card = teamCard(p, k, det[p.c]);
       slot.append(head, reel); slots.append(slot); cards.append(card);
       pairs.push([reel, card]);
     });
@@ -862,8 +982,9 @@ function announce() {
 
 function renderEmpty() {
   const rail = (ln, k) => {
-    let ids = S.d.champList.filter(c => c.lanes.includes(ln)).map(c => c.id);
-    ids = shuffle(ids.length >= 4 ? ids : S.d.champList.map(c => c.id)).slice(0, 10);
+    const all = rollable(S.d);
+    let ids = all.filter(c => c.lanes.includes(ln)).map(c => c.id);
+    ids = shuffle(ids.length >= 4 ? ids : all.map(c => c.id)).slice(0, 10);
     const col = ids.concat(ids).map(id => `<img src="${champIcon(id)}" alt="" loading="lazy">`).join('');
     return `<div class="rail"><div class="rh"><span>${esc(t('lanes')[ln])}</span><b>0${k + 1}</b></div><div class="col">${col}</div></div>`;
   };
@@ -900,7 +1021,7 @@ function syncUI() {
   $$('#mode button').forEach(b => { b.setAttribute('aria-pressed', b.dataset.v === S.mode); b.disabled = busy; });
   $$('#lane button').forEach(b => { b.setAttribute('aria-pressed', b.dataset.v === S.lane); b.disabled = busy; });
   $('#lane-f').hidden = S.mode !== 'solo';
-  [['#t-pool', S.pool], ['#t-runes', S.runes], ['#t-spells', S.spells]].forEach(([q, on]) => {
+  [['#t-pool', S.pool], ['#t-runes', S.runes], ['#t-spells', S.spells], ['#t-skins', S.skins], ['#t-skills', S.skills]].forEach(([q, on]) => {
     $(q).setAttribute('aria-checked', on); $(q).disabled = busy; $(q + ' .onoff').textContent = on ? 'ON' : 'OFF';
   });
   // Only matters once a lane is chosen.
@@ -916,6 +1037,9 @@ function syncUI() {
   $('#spin-l').textContent = S.spinning ? t('rolling') : S.result ? t('again') : t('spin');
   spin.classList.toggle('busy', S.spinning);
   spin.disabled = busy || !S.d;
+  $('#excl').disabled = busy || !S.d;
+  $('#excl-n').hidden = !S.excl.size;
+  $('#excl-n').textContent = S.excl.size;
   const copy = $('#copy');
   copy.hidden = !S.result;
   copy.disabled = busy;
@@ -951,7 +1075,14 @@ async function onSpin() {
     catch (e) { /* keep the patch already loaded */ }
     S.loading = false;
   }
-  S.result = rollAll();
+  const res = rollAll();
+  if (S.skins) {
+    S.loading = true; syncUI();
+    const det = await loadDetails(res);
+    S.loading = false;
+    res.p.forEach(p => { const sk = det[p.c] && det[p.c].skins; p.s = sk && sk.length ? pick(sk).num : 0; });
+  }
+  S.result = res;
   history.replaceState(null, '', '#d=' + enc(S.result));
   renderResult(true);
   const top = $('#result').getBoundingClientRect().top;
@@ -962,6 +1093,23 @@ async function onCopy() {
   try { await navigator.clipboard.writeText(location.href); toast(t('copied')); }
   catch (e) { toast(t('copyFail')); }
 }
+
+/* ---------- exclusion list ---------- */
+function openExcl() {
+  if (!S.d) return;
+  $('#exd-q').value = '';
+  $('#exd-q').placeholder = t('search');
+  $('#exd-g').innerHTML = [...S.d.champList].sort((a, b) => a.name.localeCompare(b.name)).map(c =>
+    `<button type="button" data-id="${esc(c.id)}" data-n="${esc(c.name.toLowerCase())}" aria-pressed="${S.excl.has(c.id)}"><img src="${champIcon(c.id)}" alt="" loading="lazy"><span>${esc(c.name)}</span></button>`).join('');
+  syncExcl();
+  $('#exd').showModal();
+}
+function syncExcl() {
+  $('#exd-n').textContent = t('excluded')(S.excl.size);
+  $('#exd-clear').disabled = !S.excl.size;
+  syncUI();
+}
+function closeExcl() { $('#exd').close(); }
 
 async function setLang(l) {
   if (l === S.lang || S.spinning || S.loading) return;
@@ -988,6 +1136,28 @@ function bindOnce() {
   $('#t-pool').addEventListener('click', () => { S.pool = !S.pool; savePrefs(); syncUI(); });
   $('#t-runes').addEventListener('click', () => { S.runes = !S.runes; savePrefs(); syncUI(); });
   $('#t-spells').addEventListener('click', () => { S.spells = !S.spells; savePrefs(); syncUI(); });
+  $('#t-skins').addEventListener('click', () => { S.skins = !S.skins; savePrefs(); syncUI(); });
+  $('#t-skills').addEventListener('click', () => { S.skills = !S.skills; savePrefs(); syncUI(); });
+  $('#excl').addEventListener('click', openExcl);
+  $('#exd-g').addEventListener('click', e => {
+    const b = e.target.closest('button[data-id]');
+    if (!b) return;
+    const id = b.dataset.id;
+    if (S.excl.has(id)) S.excl.delete(id); else S.excl.add(id);
+    b.setAttribute('aria-pressed', S.excl.has(id));
+    savePrefs(); syncExcl();
+  });
+  $('#exd-q').addEventListener('input', () => {
+    const q = $('#exd-q').value.trim().toLowerCase();
+    $$('#exd-g button').forEach(b => { b.hidden = !!q && !b.dataset.n.includes(q); });
+  });
+  $('#exd-clear').addEventListener('click', () => {
+    S.excl.clear(); $$('#exd-g button').forEach(b => b.setAttribute('aria-pressed', 'false'));
+    savePrefs(); syncExcl();
+  });
+  $('#exd-ok').addEventListener('click', closeExcl);
+  $('#exd').addEventListener('close', () => { if (!S.result && S.d) renderEmpty(); });
+  $('#exd').addEventListener('click', e => { if (e.target === $('#exd')) closeExcl(); });
   $$('.name-inputs input').forEach((inp, k) => inp.addEventListener('input', () => { S.names[k] = inp.value; }));
   $$('.plane').forEach((sel, k) => sel.addEventListener('change', () => { S.teamLanes[k] = sel.value; savePrefs(); syncUI(); }));
   $('#spin').addEventListener('click', onSpin);
