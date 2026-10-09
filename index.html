@@ -69,7 +69,7 @@ h1 .g{color:var(--volt)}
 /* ---------- Control panel ---------- */
 .panel{background:var(--panel)}
 .controls{display:grid; grid-template-columns:auto 1fr auto;
-  grid-template-areas:"mode lane spin" "roll roll spin" "names names names"}
+  grid-template-areas:"mode lane spin" "roll roll spin" "names names names" "riot riot riot"}
 .field{display:flex; flex-direction:column; gap:10px; padding:16px 22px 12px; min-width:0}
 .f-mode{grid-area:mode}
 .f-lane{grid-area:lane; border-left:1px solid var(--line)}
@@ -118,6 +118,34 @@ h1 .g{color:var(--volt)}
   background:var(--chip) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23e8ff3a' stroke-width='1.8' fill='none'/%3E%3C/svg%3E") no-repeat right 12px center}
 .plane option{background:var(--panel); color:var(--text)}
 .plane:disabled{cursor:not-allowed; opacity:.6}
+
+/* Riot account (needs the local server) */
+.f-riot{grid-area:riot; border-top:1px solid var(--line); padding:16px 22px 18px}
+.rhead{display:flex; align-items:center; gap:14px; flex-wrap:wrap}
+.rstat{display:inline-flex; align-items:center; gap:7px; font:800 12px var(--display); letter-spacing:.14em; text-transform:uppercase; color:var(--muted)}
+.rstat i{width:8px; height:8px; border-radius:50%; background:var(--muted); opacity:.6}
+.rstat.on{color:var(--volt)}
+.rstat.on i{background:var(--volt); opacity:1; box-shadow:0 0 8px var(--volt)}
+.rbody{display:flex; align-items:center; flex-wrap:wrap; gap:10px 22px}
+.rrow{display:flex; gap:4px; min-width:0}
+.rrow input,.rsrv input{width:200px; height:44px; border:0; background:var(--deep); color:var(--text); padding:0 14px; font:500 15px var(--body);
+  box-shadow:inset 0 0 0 1px var(--line); min-width:0}
+.rrow input::placeholder,.rsrv input::placeholder{color:#6d79a6}
+.rrow input:focus,.rsrv input:focus{outline:none; box-shadow:inset 0 0 0 2px var(--volt)}
+.rrow .plane{width:92px}
+.rrow .ghost,.rsrv .ghost{margin-left:0}
+.rme{display:inline-flex; align-items:center; gap:12px; flex-wrap:wrap; color:var(--sub); font-size:14px}
+.rme b{color:var(--text); font:800 20px/1 var(--display); letter-spacing:.04em}
+.rme b span{color:var(--muted)}
+.rme button{border:0; background:none; padding:0; color:var(--muted); text-decoration:underline; cursor:pointer; font-size:13px}
+.rmsg{margin:0; color:var(--sub); font-size:14px}
+.rmsg.bad{color:#ff8a9c}
+.rsrv{display:flex; align-items:center; gap:4px; flex-wrap:wrap}
+.rsrv span{color:var(--sub); font-size:14px; margin-right:8px}
+.rsrv input{width:300px}
+.mast{display:inline-flex; align-items:center; gap:8px; margin-top:8px; padding:5px 14px; background:rgba(7,16,42,.8); color:var(--soft);
+  font:600 13px var(--body); clip-path:var(--cut-sm)}
+.mast b{font:900 13px var(--display); letter-spacing:.14em; text-transform:uppercase; color:var(--volt)}
 
 /* ---------- Status ---------- */
 .status{margin-top:16px; display:flex; align-items:center; gap:10px; color:var(--sub)}
@@ -317,7 +345,7 @@ footer p{margin:0}
 @media (max-width:1020px){
   .hero{grid-template-columns:1fr; gap:20px}
   .tagline{max-width:520px}
-  .controls{grid-template-columns:minmax(0,1fr); grid-template-areas:"mode" "lane" "roll" "names" "spin"}
+  .controls{grid-template-columns:minmax(0,1fr); grid-template-areas:"mode" "lane" "roll" "names" "riot" "spin"}
   .f-lane{border-left:0; border-top:1px solid var(--line)}
   .spin{min-height:72px; clip-path:none}
   .cards{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
@@ -349,6 +377,14 @@ footer p{margin:0}
   .tog .onoff{margin-left:auto}
   .ghost{margin-left:0; justify-content:center}
   .names{padding:14px}
+  .f-riot{padding:14px}
+  .rbody{flex-direction:column; align-items:stretch}
+  .rrow{display:grid; grid-template-columns:minmax(0,1fr) 84px}
+  .rrow input{width:auto}
+  .rrow .ghost{grid-column:1/-1}
+  #mast{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .rsrv{display:grid; grid-template-columns:minmax(0,1fr)}
+  .rsrv input{width:auto}
   .name-inputs{grid-template-columns:repeat(2,minmax(0,1fr))}
   .name-inputs .pl:last-child{grid-column:1/-1}
   .spin{min-height:64px; font-size:26px; padding:0 20px}
@@ -472,6 +508,24 @@ footer p{margin:0}
           </div>
         </div>
       </div>
+      <div class="field f-riot" id="riot">
+        <div class="rhead"><span class="flabel" data-t="riot"></span><span class="rstat" id="r-stat"><i></i><span></span></span></div>
+        <div class="rbody">
+          <form class="rrow" id="r-form">
+            <input type="text" id="r-id" maxlength="22" autocomplete="off" spellcheck="false">
+            <select class="plane" id="r-reg"></select>
+            <button type="submit" class="ghost" id="r-go"><span data-t="connect"></span></button>
+          </form>
+          <div class="rme" id="r-me" hidden></div>
+          <div class="seg" id="mast" role="group" hidden></div>
+        </div>
+        <p class="rmsg" id="r-msg" hidden></p>
+        <form class="rsrv" id="r-srv" hidden>
+          <span data-t="srvAsk"></span>
+          <input type="url" id="r-url" placeholder="https://….trycloudflare.com" autocomplete="off" spellcheck="false">
+          <button type="submit" class="ghost"><span data-t="save"></span></button>
+        </form>
+      </div>
       <button type="button" class="spin" id="spin" disabled>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg>
         <span id="spin-l"></span><i class="hatch" aria-hidden="true"></i>
@@ -543,6 +597,22 @@ const T = {
     empty: 'Escolha o modo e a rota, depois gire a roleta.',
     live: 'Ao vivo', ready: 'Pronto pra girar?', h1a: 'Gire. Aceite.', h1b: 'Jogue.', rolling: 'Girando…', team5: 'Seu time',
     patch: 'Patch',
+    riot: 'Conta Riot', region: 'Região', connect: 'Conectar', save: 'Salvar', logout: 'Sair', riotId: 'Nome#TAG',
+    srvOn: 'Servidor online', srvOff: 'Servidor offline', srvNone: 'Sem servidor',
+    srvAsk: 'Endereço do servidor (o link do túnel):',
+    offNote: 'O servidor da API está desligado. A roleta funciona normalmente, só sem dados da sua conta.',
+    cached: d => `O servidor está desligado. Usando sua maestria salva em ${d}.`,
+    played: n => n === 1 ? '1 campeão jogado' : `${n} campeões jogados`,
+    mastery: 'Maestria', mAll: 'Todos', mNever: 'Nunca joguei', mPlayed: 'Já joguei', mTop: 'Meus top 10',
+    mLvl: (l, p) => `nível ${l} · ${p} pts`, mNone: 'nunca jogou',
+    rErr: {
+      bad_input: 'Use o formato Nome#TAG.', not_found: 'Não achei esse Riot ID nessa região.',
+      bad_key: 'A chave da Riot expirou ou é inválida. Gere outra no portal da Riot e reinicie o servidor.',
+      no_key: 'O servidor está sem a chave da Riot. Veja o arquivo server/.env.',
+      rate_limited: 'Muitas buscas seguidas. Espere um minuto e tente de novo.',
+      offline: 'Não consegui falar com o servidor. Ele está ligado?',
+      bad_url: 'Cole o endereço completo, começando com https://'
+    },
     lanes: { top: 'Topo', jungle: 'Selva', mid: 'Meio', bot: 'Atirador', support: 'Suporte' },
     legal: 'Rift Roulette não é endossado pela Riot Games e não reflete as opiniões da Riot Games nem de ninguém oficialmente envolvido na produção ou gestão de League of Legends. League of Legends e Riot Games são marcas registradas da Riot Games, Inc.'
   },
@@ -564,6 +634,22 @@ const T = {
     empty: 'Pick a mode and lane, then spin the roulette.',
     live: 'Live', ready: 'Ready to spin?', h1a: 'Spin. Accept.', h1b: 'Play.', rolling: 'Spinning…', team5: 'Your team',
     patch: 'Patch',
+    riot: 'Riot account', region: 'Region', connect: 'Connect', save: 'Save', logout: 'Log out', riotId: 'Name#TAG',
+    srvOn: 'Server online', srvOff: 'Server offline', srvNone: 'No server',
+    srvAsk: 'Server address (the tunnel link):',
+    offNote: "The API server is off. The roulette works as usual, just without your account's data.",
+    cached: d => `The server is off. Using your mastery saved on ${d}.`,
+    played: n => n === 1 ? '1 champion played' : `${n} champions played`,
+    mastery: 'Mastery', mAll: 'All', mNever: 'Never played', mPlayed: 'Played', mTop: 'My top 10',
+    mLvl: (l, p) => `level ${l} · ${p} pts`, mNone: 'never played',
+    rErr: {
+      bad_input: 'Use the Name#TAG format.', not_found: "Couldn't find that Riot ID in that region.",
+      bad_key: 'The Riot key expired or is invalid. Get a new one on the Riot portal and restart the server.',
+      no_key: 'The server has no Riot key. See the server/.env file.',
+      rate_limited: 'Too many lookups in a row. Wait a minute and try again.',
+      offline: "Couldn't reach the server. Is it running?",
+      bad_url: 'Paste the full address, starting with https://'
+    },
     lanes: { top: 'Top', jungle: 'Jungle', mid: 'Mid', bot: 'Bot', support: 'Support' },
     legal: "Rift Roulette isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing League of Legends. League of Legends and Riot Games are trademarks or registered trademarks of Riot Games, Inc."
   }
@@ -572,7 +658,9 @@ const T = {
 const S = {
   lang: initialLang(), version: null, latest: null, d: null,
   mode: 'solo', lane: 'any', teamLanes: ['any', 'any', 'any', 'any', 'any'], runes: true, spells: true, pool: true, skins: true, skills: true, excl: new Set(), names: ['', '', '', '', ''],
-  result: null, spinning: false, loading: false, cache: {}, det: {}
+  result: null, spinning: false, loading: false, cache: {}, det: {},
+  // Riot account via the local API server. api: server address; online: null while unknown.
+  riot: { api: '', online: null, busy: false, name: '', tag: '', region: 'br1', player: null, filter: 'all', msg: '' }
 };
 
 /* ---------- helpers ---------- */
@@ -669,7 +757,7 @@ async function loadData(version, lang) {
   );
 
   const champs = {};
-  for (const ch of Object.values(c.data)) champs[ch.id] = { id: ch.id, name: ch.name, title: ch.title, tags: ch.tags || [] };
+  for (const ch of Object.values(c.data)) champs[ch.id] = { id: ch.id, key: ch.key, name: ch.name, title: ch.title, tags: ch.tags || [] };
   const champList = Object.values(champs);
   for (const ch of champList) ch.lanes = lanesOf(ch);
 
@@ -727,9 +815,12 @@ async function loadDetails(res) {
   return out;
 }
 // Champions the player excluded never come up, unless that would leave too few to roll a team.
+// In solo, the mastery filter narrows it further, unless nobody would be left.
 function rollable(d) {
-  const ok = d.champList.filter(c => !S.excl.has(c.id));
-  return ok.length >= 5 ? ok : d.champList;
+  let ok = d.champList.filter(c => !S.excl.has(c.id));
+  if (ok.length < 5) ok = d.champList;
+  const fit = masteryFit(ok);
+  return fit.length ? fit : ok;
 }
 
 /* ---------- roll ---------- */
@@ -856,6 +947,7 @@ function soloCard(p, det) {
         <h2 class="cname">${esc(ch.name)}</h2>
         <p class="ctitle">${esc(ch.title)}</p>
         ${sk ? `<span class="skin"><b>${esc(t('skin'))}</b>${esc(sk)}</span>` : ''}
+        ${mastHTML(ch)}
         ${orderHTML(p, det)}
       </div>
     </article>
@@ -1002,7 +1094,7 @@ function applyTexts() {
   document.documentElement.lang = S.lang === 'pt' ? 'pt-BR' : 'en';
   $$('[data-t]').forEach(e => { if (e.dataset.t) e.textContent = t(e.dataset.t); });
   $$('[data-lane]').forEach(e => { if (e.dataset.lane !== 'any') e.textContent = t('lanes')[e.dataset.lane]; });
-  $$('.plane').forEach((sel, k) => {
+  $$('.pl .plane').forEach((sel, k) => {
     sel.innerHTML = ['any'].concat(LANES).map(l => `<option value="${l}">${esc(l === 'any' ? t('any') : t('lanes')[l])}</option>`).join('');
     sel.setAttribute('aria-label', `${t('lane')}: ${t('player')} ${k + 1}`);
   });
@@ -1011,6 +1103,10 @@ function applyTexts() {
     inp.setAttribute('aria-label', `${t('player')} ${k + 1}`);
   });
   $('#patch').textContent = S.version ? `${t('patch')} ${S.version}` : '…';
+  $('#r-id').placeholder = t('riotId');
+  $('#r-id').setAttribute('aria-label', 'Riot ID');
+  $('#r-reg').setAttribute('aria-label', t('region'));
+  $('#mast').setAttribute('aria-label', t('mastery'));
   if (!S.result && S.d) renderEmpty();
   syncUI();
 }
@@ -1028,7 +1124,7 @@ function syncUI() {
   $('#t-pool').hidden = S.mode === 'solo' ? S.lane === 'any' : S.teamLanes.every(l => l === 'any');
   $('#names').hidden = S.mode !== 'team';
   $$('.name-inputs input').forEach((inp, k) => { if (document.activeElement !== inp) inp.value = S.names[k]; });
-  $$('.plane').forEach((sel, k) => {
+  $$('.pl .plane').forEach((sel, k) => {
     sel.value = S.teamLanes[k];
     sel.disabled = busy;
     [...sel.options].forEach(o => { o.disabled = o.value !== 'any' && S.teamLanes.some((l, j) => j !== k && l === o.value); });
@@ -1043,6 +1139,7 @@ function syncUI() {
   const copy = $('#copy');
   copy.hidden = !S.result;
   copy.disabled = busy;
+  syncRiot();
 }
 
 function setStatus(kind) {
@@ -1062,6 +1159,136 @@ function toast(msg) {
   tEl.textContent = msg; tEl.classList.add('on');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => tEl.classList.remove('on'), 2200);
+}
+
+/* ---------- Riot account (local API server) ---------- */
+// Fixed server address, if there is one (e.g. a named Cloudflare tunnel on your own domain).
+// Empty: use the address saved in this browser, a ?api= link, or the page's own origin when
+// the page was opened through the server itself.
+const RIOT_API = '';
+const REGIONS = { br1: 'BR', la1: 'LAN', la2: 'LAS', na1: 'NA', oc1: 'OCE', euw1: 'EUW', eun1: 'EUNE', tr1: 'TR', ru: 'RU', me1: 'ME', kr: 'KR', jp1: 'JP', ph2: 'PH', sg2: 'SG', th2: 'TH', tw2: 'TW', vn2: 'VN' };
+const FILTERS = { all: 'mAll', never: 'mNever', played: 'mPlayed', top: 'mTop' };
+
+function cleanApi(u) {
+  try {
+    const x = new URL(String(u).trim());
+    if (x.protocol === 'https:' || (x.protocol === 'http:' && /^(localhost|127\.0\.0\.1)$/.test(x.hostname))) return x.origin;
+  } catch (e) {}
+  return '';
+}
+function loadRiot() {
+  const R = S.riot;
+  try {
+    const o = JSON.parse(localStorage.getItem('rr-riot') || '{}');
+    R.api = cleanApi(o.api || '');
+    if (typeof o.name === 'string') R.name = o.name.slice(0, 16);
+    if (typeof o.tag === 'string') R.tag = o.tag.slice(0, 5);
+    if (REGIONS[o.region]) R.region = o.region;
+    if (FILTERS[o.filter]) R.filter = o.filter;
+    const pl = o.player;
+    if (pl && typeof pl.name === 'string' && typeof pl.tag === 'string' && pl.m && typeof pl.m === 'object' && typeof pl.at === 'number') R.player = pl;
+  } catch (e) {}
+  // A ?api= link sets the server for this browser.
+  const q = new URLSearchParams(location.search).get('api');
+  if (q !== null) {
+    R.api = cleanApi(q);
+    const u = new URL(location.href);
+    u.searchParams.delete('api');
+    history.replaceState(null, '', u.pathname + u.search + u.hash);
+    saveRiot();
+  }
+}
+function saveRiot() {
+  const R = S.riot;
+  try { localStorage.setItem('rr-riot', JSON.stringify({ api: R.api, name: R.name, tag: R.tag, region: R.region, filter: R.filter, player: R.player })); } catch (e) {}
+}
+function apiBase() {
+  if (RIOT_API) return RIOT_API;
+  if (S.riot.api) return S.riot.api;
+  if (/^https?:$/.test(location.protocol) && !/github\.io$/.test(location.hostname)) return location.origin;
+  return '';
+}
+async function api(path) {
+  const base = apiBase(), fail = code => Object.assign(new Error(code), { code });
+  if (!base) throw fail('offline');
+  let r, j = null;
+  try { r = await fetch(base + path, AbortSignal.timeout ? { signal: AbortSignal.timeout(10000) } : {}); }
+  catch (e) { throw fail('offline'); }
+  try { j = await r.json(); } catch (e) {}
+  if (!r.ok || !j) throw fail((j && j.error) || 'offline');
+  return j;
+}
+async function riotPing() {
+  const R = S.riot;
+  if (!apiBase()) { R.online = null; syncRiot(); return; }
+  try { await api('/api/health'); R.online = true; } catch (e) { R.online = false; }
+  syncRiot();
+  // Refresh the saved account's mastery in the background.
+  if (R.online && R.player) riotLookup(true);
+}
+async function riotLookup(quiet) {
+  const R = S.riot;
+  if (R.busy) return;
+  R.busy = true; if (!quiet) R.msg = ''; syncRiot();
+  try {
+    const j = await api(`/api/player?name=${encodeURIComponent(R.name)}&tag=${encodeURIComponent(R.tag)}&region=${R.region}`);
+    const m = {};
+    for (const row of j.mastery || []) if (Array.isArray(row)) m[row[0]] = [row[1], row[2], row[3]];
+    R.player = { name: String(j.gameName), tag: String(j.tagLine), region: j.region, m, at: Date.now() };
+    R.online = true; R.msg = '';
+    saveRiot();
+    if (!S.result && S.d) renderEmpty();
+  } catch (e) {
+    if (e.code === 'offline') R.online = false;
+    if (!quiet || e.code !== 'offline') { R.msg = t('rErr')[e.code] ? e.code : 'offline'; }
+  }
+  R.busy = false; syncRiot();
+}
+// Solo only: which of the given champions fit the chosen mastery filter.
+function masteryFit(list) {
+  const R = S.riot, pl = R.player;
+  if (S.mode !== 'solo' || !pl || R.filter === 'all') return list;
+  const pts = c => (pl.m[c.key] || [0, 0])[1];
+  if (R.filter === 'never') return list.filter(c => !pts(c));
+  if (R.filter === 'played') return list.filter(c => pts(c) > 0);
+  const top = new Set(Object.entries(pl.m).sort((a, b) => b[1][1] - a[1][1]).slice(0, 10).map(e => e[0]));
+  return list.filter(c => top.has(c.key));
+}
+function mastHTML(ch) {
+  const pl = S.riot.player;
+  if (!pl || !ch.key) return '';
+  const m = pl.m[ch.key];
+  const txt = m && m[1] ? t('mLvl')(m[0], m[1].toLocaleString(S.lang === 'pt' ? 'pt-BR' : 'en')) : t('mNone');
+  return `<span class="mast"><b>${esc(t('mastery'))}</b>${esc(txt)}</span>`;
+}
+function syncRiot() {
+  const R = S.riot, base = apiBase(), pl = R.player, busy = S.spinning || S.loading;
+  // Visitors with no server and no saved account never see this panel.
+  $('#riot').hidden = !base && !pl;
+  const st = $('#r-stat');
+  st.classList.toggle('on', R.online === true);
+  st.lastChild.textContent = !base ? t('srvNone') : R.online ? t('srvOn') : R.online === false ? t('srvOff') : '…';
+  $('#r-form').hidden = !!pl || R.online !== true;
+  $('#r-go').disabled = R.busy || busy;
+  if (document.activeElement !== $('#r-id')) $('#r-id').value = R.name ? `${R.name}#${R.tag}` : '';
+  $('#r-reg').value = R.region;
+  $('#r-me').hidden = !pl;
+  if (pl) {
+    const n = Object.values(pl.m).filter(x => x[1] > 0).length;
+    $('#r-me').innerHTML = `<b>${esc(pl.name)}<span>#${esc(pl.tag)}</span></b><span>${esc(REGIONS[pl.region] || '')} · ${esc(t('played')(n))}</span><button type="button" id="r-out">${esc(t('logout'))}</button>`;
+  }
+  $('#mast').hidden = !pl || S.mode !== 'solo';
+  $$('#mast button').forEach(b => { b.setAttribute('aria-pressed', b.dataset.v === R.filter); b.disabled = busy; });
+  // R.msg holds an error code, so it follows a language switch.
+  let msg = R.msg ? t('rErr')[R.msg] : '';
+  if (!msg && base && R.online === false) {
+    msg = pl ? t('cached')(new Date(pl.at).toLocaleString(S.lang === 'pt' ? 'pt-BR' : 'en', { dateStyle: 'short', timeStyle: 'short' })) : t('offNote');
+  }
+  $('#r-msg').hidden = !msg;
+  $('#r-msg').textContent = msg;
+  $('#r-msg').classList.toggle('bad', !!R.msg);
+  $('#r-srv').hidden = !!RIOT_API || (!!base && R.online !== false);
+  if (document.activeElement !== $('#r-url')) $('#r-url').value = R.api;
 }
 
 /* ---------- actions ---------- */
@@ -1159,7 +1386,37 @@ function bindOnce() {
   $('#exd').addEventListener('close', () => { if (!S.result && S.d) renderEmpty(); });
   $('#exd').addEventListener('click', e => { if (e.target === $('#exd')) closeExcl(); });
   $$('.name-inputs input').forEach((inp, k) => inp.addEventListener('input', () => { S.names[k] = inp.value; }));
-  $$('.plane').forEach((sel, k) => sel.addEventListener('change', () => { S.teamLanes[k] = sel.value; savePrefs(); syncUI(); }));
+  $$('.pl .plane').forEach((sel, k) => sel.addEventListener('change', () => { S.teamLanes[k] = sel.value; savePrefs(); syncUI(); }));
+  $('#r-reg').innerHTML = Object.entries(REGIONS).map(([v, l]) => `<option value="${v}">${l}</option>`).join('');
+  $('#mast').innerHTML = Object.entries(FILTERS).map(([v, k]) => `<button type="button" data-v="${v}"><span data-t="${k}"></span></button>`).join('');
+  $('#r-form').addEventListener('submit', e => {
+    e.preventDefault();
+    const R = S.riot, m = $('#r-id').value.trim().match(/^(.{3,16})#([\p{L}\p{N}]{2,5})$/u);
+    R.region = $('#r-reg').value;
+    if (!m) { R.msg = 'bad_input'; syncRiot(); return; }
+    R.name = m[1].trim(); R.tag = m[2];
+    saveRiot(); riotLookup(false);
+  });
+  $('#r-me').addEventListener('click', e => {
+    if (!e.target.closest('#r-out')) return;
+    S.riot.player = null; S.riot.msg = '';
+    saveRiot(); syncUI();
+    if (!S.result && S.d) renderEmpty();
+  });
+  $('#mast').addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if (!b || b.disabled) return;
+    S.riot.filter = b.dataset.v;
+    saveRiot(); syncUI();
+    if (!S.result && S.d) renderEmpty();
+  });
+  $('#r-srv').addEventListener('submit', e => {
+    e.preventDefault();
+    const R = S.riot, u = cleanApi($('#r-url').value);
+    if (!u) { R.msg = 'bad_url'; syncRiot(); return; }
+    R.api = u; R.online = null; R.msg = '';
+    saveRiot(); syncRiot(); riotPing();
+  });
   $('#spin').addEventListener('click', onSpin);
   $('#copy').addEventListener('click', onCopy);
   window.addEventListener('hashchange', () => location.reload());
@@ -1213,9 +1470,11 @@ async function boot() {
 }
 
 loadPrefs();
+loadRiot();
 bindOnce();
 applyTexts();
 boot();
+riotPing();
 })();
 </script>
 </body>

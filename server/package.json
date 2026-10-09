@@ -1,0 +1,10 @@
+{
+  "name": "rift-roulette-server",
+  "private": true,
+  "description": "Servidor local que guarda a chave da Riot e responde ao Rift Roulette.",
+  "type": "module",
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "start": "node server.mjs"
+  }
+}
